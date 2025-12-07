@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - WeatherPro Ultimate</title>
+    <link rel="stylesheet" href="css/dashboard.css?v=2.0">
+    <link rel="stylesheet" href="css/admin.css?v=2.0">
+    <link rel="stylesheet" href="css/admin-premium.css?v=2.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* EMERGENCY FIX - MAKE ALL TEXT VISIBLE */
+        /* Removed global override that was causing conflicts */
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+        
+        p, span, div, td, th {
+            color: #e5e7eb !important;
+        }
+        
+        label {
+            color: #ffffff !important;
+            font-weight: 600 !important;
+            display: block !important;
+            margin-bottom: 0.5rem !important;
+            font-size: 0.95rem !important;
+        }
+        
+        /* Ensure all form labels are visible */
+        .form-group label,
+        .editor-card label,
+        .content-card label,
+        .settings-card label {
+            color: #ffffff !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Feature editor labels */
+        .feature-editor label,
+        .feature-item-editor label {
+            color: #ffffff !important;
+            font-weight: 600 !important;
+        }
+        
+        .sidebar-nav a {
+            color: #e5e7eb !important;
+        }
+        
+        .sidebar-nav a.active {
+            color: #ffffff !important;
+        }
+        
+        input, textarea, select {
+            color: #1f2937 !important;
+            background: #ffffff !important;
+        }
+        
+        button {
+            color: #ffffff !important;
+        }
+        
+        button span {
+            color: #ffffff !important;
+        }
+        
+        table th {
+            color: #ffffff !important;
+        }
+        
+        table td {
+            color: #e5e7eb !important;
+        }
+        
+        /* Fix for role badges - make text dark on light backgrounds */
+        .status-badge,
+        .status-active,
+        .status-inactive,
+        .status-admin {
+            color: #1f2937 !important;
+            font-weight: 700 !important;
+        }
+        
+        /* Light Theme */
+        body.light-theme {
+            background: #f3f4f6 !important;
+        }
+        
+        body.light-theme .sidebar,
+        body.light-theme .dashboard-header,
+        body.light-theme .content-card,
+        body.light-theme .stat-card-admin,
+        body.light-theme .chart-card,
+        body.light-theme .table-container,
+        body.light-theme .editor-card {
+            background: #ffffff !important;
+            color: #1f2937 !important;
+        }
+        
+        body.light-theme h1,
+        body.light-theme h2,
+        body.light-theme h3,
+        body.light-theme h4,
+        body.light-theme h5,
+        body.light-theme h6 {
+            color: #1f2937 !important;
+        }
+        
+        body.light-theme p,
+        body.light-theme span,
+        body.light-theme div,
+        body.light-theme label {
+            color: #4b5563 !important;
+        }
+        
+        body.light-theme .sidebar-nav a {
+            color: #6b7280 !important;
+        }
+        
+        body.light-theme .sidebar-nav a.active,
+        body.light-theme .sidebar-nav a:hover {
+            color: #1f2937 !important;
+            background: #f3f4f6 !important;
+        }
+        
+        body.light-theme .stat-details h3,
+        body.light-theme .stat-details p {
+            color: #1f2937 !important;
+        }
+        
+        body.light-theme table th {
+            color: #ffffff !important;
+        }
+        
+        body.light-theme table td {
+            color: #1f2937 !important;
+        }
+        
+        /* Light theme - Welcome banner text must be WHITE on gradient */
+        body.light-theme .content-card[style*="gradient"] h2,
+        body.light-theme .content-card[style*="gradient"] h2 span,
+        body.light-theme .content-card[style*="gradient"] p {
+            color: #ffffff !important;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+        }
+        
+        /* Fix icons in light theme */
+        body.light-theme i,
+        body.light-theme .fas,
+        body.light-theme .far,
+        body.light-theme .fab {
+            color: inherit !important;
+        }
+        
+        body.light-theme .sidebar-nav a i {
+            color: #6b7280 !important;
+        }
+        
+        body.light-theme .sidebar-nav a.active i,
+        body.light-theme .sidebar-nav a:hover i {
+            color: #1f2937 !important;
+        }
+        
+        body.light-theme .header-btn i {
+            color: #1f2937 !important;
+        }
+        
+        body.light-theme button i {
+            color: inherit !important;
+        }
+        
+        body.light-theme .btn-primary i,
+        body.light-theme .btn-edit i,
+        body.light-theme .btn-delete i {
+            color: #ffffff !important;
+        }
+        
+        body.light-theme .logo i {
+            color: #8b5cf6 !important;
+        }
+        
+        body.light-theme .user-avatar i {
+            color: #ffffff !important;
+        }
+        
+        body.light-theme .stat-icon i {
+            color: #ffffff !important;
+        }
+        
+        /* Password Confirmation Modal Styles */
+        .password-confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .password-confirm-overlay.show {
+            opacity: 1;
+        }
+        
+        .password-confirm-overlay.show .password-confirm-modal {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+        
+        .password-confirm-modal {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 24px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9) translateY(-20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .password-confirm-header {
+            text-align: center;
+            padding: 2.5rem 2rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .password-confirm-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .password-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            position: relative;
+            animation: iconFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .password-icon {
+            font-size: 2.5rem;
+            color: white;
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes iconPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .password-confirm-header h3 {
+            color: white !important;
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+            position: relative;
+        }
+        
+        .password-confirm-header p {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-size: 1rem;
+            margin: 0;
+            position: relative;
+        }
+        
+        .password-confirm-body {
+            padding: 2rem;
+        }
+        
+        .password-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 0 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .password-input-wrapper:focus-within {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+        
+        .password-input-wrapper > i {
+            color: #667eea;
+            font-size: 1.1rem;
+            margin-right: 0.75rem;
+        }
+        
+        .password-input-wrapper input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 1rem 0;
+            color: #1f2937 !important;
+            font-size: 1rem;
+            outline: none;
+            font-weight: 600;
+        }
+        
+        .password-input-wrapper input::placeholder {
+            color: rgba(31, 41, 55, 0.5);
+        }
+        
+        .password-input-wrapper input.error {
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .password-toggle {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: color 0.3s ease;
+        }
+        
+        .password-toggle:hover {
+            color: #764ba2;
+        }
+        
+        .password-toggle i {
+            color: inherit !important;
+        }
+        
+        .password-error-message {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            color: #ef4444 !important;
+            font-size: 0.9rem;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .password-error-message.show {
+            display: flex;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .password-error-message i {
+            color: #ef4444 !important;
+        }
+        
+        .password-error-message span {
+            color: #ef4444 !important;
+        }
+        
+        .password-confirm-footer {
+            padding: 1.5rem 2rem;
+            display: flex;
+            gap: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-cancel,
+        .btn-confirm {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: white !important;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .btn-confirm {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white !important;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-confirm:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+        
+        .btn-confirm:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .btn-cancel i,
+        .btn-confirm i {
+            color: white !important;
+        }
+        
+        /* Quick Action Buttons */
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .quick-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+        }
+        
+        .quick-action-btn:active {
+            transform: translateY(0);
+        }
+        
+        .quick-action-add {
+            color: #10b981 !important;
+        }
+        
+        .quick-action-add i {
+            color: #10b981 !important;
+        }
+        
+        .quick-action-report {
+            color: #3b82f6 !important;
+        }
+        
+        .quick-action-report i {
+            color: #3b82f6 !important;
+        }
+        
+        .quick-action-health {
+            color: #f59e0b !important;
+        }
+        
+        .quick-action-health i {
+            color: #f59e0b !important;
+        }
+        
+        .quick-action-btn span {
+            color: inherit !important;
+        }
+        
+        /* Welcome banner text - MAXIMUM FORCE */
+        .content-card h2,
+        .content-card h2 span,
+        .content-card h2 #adminNameDisplay,
+        .content-card p {
+            color: #ffffff !important;
+            opacity: 1 !important;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+            font-weight: 700 !important;
+        }
+        
+        /* Specific targeting */
+        #adminNameDisplay {
+            color: #ffffff !important;
+            opacity: 1 !important;
+        }
+        
+        /* All text in admin panel */
+        .admin-main * {
+            color: #e5e7eb;
+        }
+        
+        .admin-main h1,
+        .admin-main h2,
+        .admin-main h3,
+        .admin-main h4,
+        .admin-main h5,
+        .admin-main h6 {
+            color: #ffffff !important;
+        }
+        
+        .admin-main label {
+            color: #ffffff !important;
+        }
+        
+        /* Dashboard stat values - FORCE VISIBILITY */
+        .info-item strong,
+        #memoryUsage,
+        #responseTime,
+        #newUsers7d,
+        #activeSessions,
+        #apiCallsToday,
+        #avgResponse,
+        #dbStatus,
+        #apiStatusDash {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+        
+        /* All strong tags in admin */
+        .admin-main strong {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+        
+        /* Chart card values */
+        .chart-card strong,
+        .chart-card h3,
+        .chart-card p {
+            color: #ffffff !important;
+        }
+        
+        /* LIGHT THEME - Numbers must be DARK */
+        body.light-theme .info-item strong,
+        body.light-theme #memoryUsage,
+        body.light-theme #responseTime,
+        body.light-theme #newUsers7d,
+        body.light-theme #activeSessions,
+        body.light-theme #apiCallsToday,
+        body.light-theme #avgResponse,
+        body.light-theme .admin-main strong,
+        body.light-theme .chart-card strong {
+            color: #1f2937 !important;
+        }
+        
+        /* Status badges - Better visibility in both themes */
+        .status-active {
+            background: #10b981 !important;
+            color: #ffffff !important;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 700 !important;
+        }
+        
+        .status-inactive {
+            background: #ef4444 !important;
+            color: #ffffff !important;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 700 !important;
+        }
+        
+        /* Light theme status badges */
+        body.light-theme .status-active {
+            background: #10b981 !important;
+            color: #ffffff !important;
+        }
+        
+        body.light-theme .status-inactive {
+            background: #ef4444 !important;
+            color: #ffffff !important;
+        }
+    </style>
+    
+    <!-- Prevent theme flash - Apply saved theme immediately -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('adminTheme');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.add('light-theme');
+            }
+        })();
+    </script>
+</head>
+<body><script>
+    // Apply theme to body immediately
+    if (localStorage.getItem('adminTheme') === 'light') {
+        document.body.classList.add('light-theme');
+    }
+</script>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-cloud-sun"></i>
+                <span>WeatherPro Admin</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-section="dashboard">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-section="users">
+                <i class="fas fa-users"></i>
+                <span>Users Management</span>
+            </a>
+            <a href="#" class="nav-item" data-section="locations">
+                <i class="fas fa-map-marked-alt"></i>
+                <span>All Locations</span>
+            </a>
+            <a href="#" class="nav-item" data-section="alerts">
+                <i class="fas fa-bell"></i>
+                <span>Weather Alerts</span>
+            </a>
+            <a href="#" class="nav-item" data-section="content">
+                <i class="fas fa-edit"></i>
+                <span>Content Management</span>
+            </a>
+            <a href="#" class="nav-item" data-section="activity">
+                <i class="fas fa-history"></i>
+                <span>Login Activity</span>
+            </a>
+            <a href="#" class="nav-item" data-section="settings">
+                <i class="fas fa-cog"></i>
+                <span>System Settings</span>
+            </a>
+            <a href="/dashboard" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>User Dashboard</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar admin-badge">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name">Admin</div>
+                    <div class="user-email">Administrator</div>
+                </div>
+            </div>
+            <button class="btn-logout" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2>Admin Panel</h2>
+            </div>
+            <div class="header-right">
+                <a href="/" target="_blank" style="padding: 1rem 2rem; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: white !important; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 0.75rem; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.5); font-size: 1.1rem; margin-right: 1rem;">
+                    <i class="fas fa-home" style="color: white !important; font-size: 1.25rem;"></i>
+                    <span style="color: white !important;">VIEW LANDING PAGE</span>
+                </a>
+                <button class="header-btn" id="refreshBtn" title="Refresh">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button class="header-btn" id="themeToggle" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="content-section active">
+            <div class="section-header">
+                <h1>Dashboard Overview</h1>
+                <p id="currentDateTime">Loading...</p>
+            </div>
+
+            <!-- Quick Actions Bar -->
+            <div class="content-card" style="margin-bottom: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h2 style="color: #1a1a2e !important; margin-bottom: 0.5rem; font-weight: 800 !important; text-shadow: none !important;">Welcome back, <span id="adminNameDisplay" style="color: #1a1a2e !important;">Admin</span>! 👋</h2>
+                        <p style="color: #2d3748 !important; margin: 0; font-weight: 600 !important; text-shadow: none !important;">Here's what's happening with your platform today</p>
+                    </div>
+                    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                        <button class="quick-action-btn quick-action-add" onclick="quickAddUser()">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Quick Add</span>
+                        </button>
+                        <button class="quick-action-btn quick-action-report" onclick="generateReport()">
+                            <i class="fas fa-file-download"></i>
+                            <span>Report</span>
+                        </button>
+                        <button class="quick-action-btn quick-action-health" onclick="systemHealth()">
+                            <i class="fas fa-heartbeat"></i>
+                            <span>Health</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Premium Quick Actions Bar -->
+            <div class="quick-actions-bar" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                <a href="/" target="_blank" class="quick-action-card primary shine-effect" style="position: relative; display: flex; align-items: center; gap: 1rem; padding: 1.5rem; background: rgba(139, 92, 246, 0.1); backdrop-filter: blur(20px); border: 2px solid rgba(139, 92, 246, 0.3); border-radius: 16px; cursor: pointer; transition: all 0.4s ease; text-decoration: none; overflow: hidden;">
+                    <div class="quick-action-icon" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 1.5rem; background: linear-gradient(135deg, #8b5cf6, #7c3aed); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);">
+                        <i class="fas fa-home" style="color: white !important;"></i>
+                    </div>
+                    <div class="quick-action-content" style="flex: 1;">
+                        <div class="quick-action-title" style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem;">Landing Page</div>
+                        <div class="quick-action-desc" style="font-size: 0.875rem;">View live site</div>
+                    </div>
+                    <i class="fas fa-arrow-right quick-action-arrow" style="font-size: 1.25rem; color: #9ca3af;"></i>
+                </a>
+                
+                <a href="/dashboard" target="_blank" class="quick-action-card secondary shine-effect" style="position: relative; display: flex; align-items: center; gap: 1rem; padding: 1.5rem; background: rgba(59, 130, 246, 0.1); backdrop-filter: blur(20px); border: 2px solid rgba(59, 130, 246, 0.3); border-radius: 16px; cursor: pointer; transition: all 0.4s ease; text-decoration: none; overflow: hidden;">
+                    <div class="quick-action-icon" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 1.5rem; background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);">
+                        <i class="fas fa-tachometer-alt" style="color: white !important;"></i>
+                    </div>
+                    <div class="quick-action-content" style="flex: 1;">
+                        <div class="quick-action-title" style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem;">Dashboard</div>
+                        <div class="quick-action-desc" style="font-size: 0.875rem;">User dashboard</div>
+                    </div>
+                    <i class="fas fa-arrow-right quick-action-arrow" style="font-size: 1.25rem; color: #9ca3af;"></i>
+                </a>
+                
+                <button class="quick-action-card success shine-effect" onclick="refreshData()" style="position: relative; display: flex; align-items: center; gap: 1rem; padding: 1.5rem; background: rgba(16, 185, 129, 0.1); backdrop-filter: blur(20px); border: 2px solid rgba(16, 185, 129, 0.3); border-radius: 16px; cursor: pointer; transition: all 0.4s ease; overflow: hidden; width: 100%;">
+                    <div class="quick-action-icon" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 1.5rem; background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-sync-alt" style="color: white !important;"></i>
+                    </div>
+                    <div class="quick-action-content" style="flex: 1;">
+                        <div class="quick-action-title" style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem;">Refresh Data</div>
+                        <div class="quick-action-desc" style="font-size: 0.875rem;">Update stats</div>
+                    </div>
+                    <i class="fas fa-arrow-right quick-action-arrow" style="font-size: 1.25rem; color: #9ca3af;"></i>
+                </button>
+                
+                <button class="quick-action-card warning shine-effect" onclick="exportData()" style="position: relative; display: flex; align-items: center; gap: 1rem; padding: 1.5rem; background: rgba(245, 158, 11, 0.1); backdrop-filter: blur(20px); border: 2px solid rgba(245, 158, 11, 0.3); border-radius: 16px; cursor: pointer; transition: all 0.4s ease; overflow: hidden; width: 100%;">
+                    <div class="quick-action-icon" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 1.5rem; background: linear-gradient(135deg, #f59e0b, #d97706); box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);">
+                        <i class="fas fa-download" style="color: white !important;"></i>
+                    </div>
+                    <div class="quick-action-content" style="flex: 1;">
+                        <div class="quick-action-title" style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.25rem;">Export Data</div>
+                        <div class="quick-action-desc" style="font-size: 0.875rem;">Download reports</div>
+                    </div>
+                    <i class="fas fa-arrow-right quick-action-arrow" style="font-size: 1.25rem; color: #9ca3af;"></i>
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card-admin glass-effect">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="totalUsers" style="font-size: 2.5rem !important; font-weight: 800 !important; margin: 0.5rem 0 !important; text-shadow: none !important; opacity: 1 !important; display: block !important;">0</h3>
+                        <p style="font-size: 0.95rem !important; margin: 0 !important; opacity: 1 !important; display: block !important; font-weight: 600 !important;">Total Users</p>
+                    </div>
+                    <div class="stat-sparkline">
+                        <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                            <polyline points="0,25 20,20 40,22 60,15 80,18 100,10" 
+                                      fill="none" 
+                                      stroke="rgba(102, 126, 234, 0.5)" 
+                                      stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-card-admin glass-effect">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="totalLocations" style="font-size: 2.5rem !important; font-weight: 800 !important; margin: 0.5rem 0 !important; text-shadow: none !important; opacity: 1 !important; display: block !important;">0</h3>
+                        <p style="font-size: 0.95rem !important; margin: 0 !important; opacity: 1 !important; display: block !important; font-weight: 600 !important;">Saved Locations</p>
+                    </div>
+                    <div class="stat-sparkline">
+                        <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                            <polyline points="0,20 20,18 40,15 60,12 80,8 100,5" 
+                                      fill="none" 
+                                      stroke="rgba(240, 147, 251, 0.5)" 
+                                      stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-card-admin glass-effect">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="totalAlerts" style="font-size: 2.5rem !important; font-weight: 800 !important; margin: 0.5rem 0 !important; text-shadow: none !important; opacity: 1 !important; display: block !important;">0</h3>
+                        <p style="font-size: 0.95rem !important; margin: 0 !important; opacity: 1 !important; display: block !important; font-weight: 600 !important;">Active Alerts</p>
+                    </div>
+                    <div class="stat-sparkline">
+                        <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                            <polyline points="0,22 20,20 40,18 60,20 80,15 100,12" 
+                                      fill="none" 
+                                      stroke="rgba(79, 172, 254, 0.5)" 
+                                      stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-card-admin glass-effect">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="activeUsers" style="font-size: 2.5rem !important; font-weight: 800 !important; margin: 0.5rem 0 !important; text-shadow: none !important; opacity: 1 !important; display: block !important;">0</h3>
+                        <p style="font-size: 0.95rem !important; margin: 0 !important; opacity: 1 !important; display: block !important; font-weight: 600 !important;">Active Today</p>
+                    </div>
+                    <div class="stat-sparkline">
+                        <svg viewBox="0 0 100 30" preserveAspectRatio="none">
+                            <polyline points="0,15 20,12 40,10 60,8 80,5 100,3" 
+                                      fill="none" 
+                                      stroke="rgba(67, 233, 123, 0.5)" 
+                                      stroke-width="2"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Features Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                <!-- Quick Search -->
+                <div class="chart-card">
+                    <h3><i class="fas fa-search"></i> Quick Search</h3>
+                    <input type="text" id="quickSearch" class="form-control" placeholder="Search users, locations, alerts..." style="margin-bottom: 1rem;">
+                    <div id="quickSearchResults" style="max-height: 200px; overflow-y: auto;"></div>
+                </div>
+
+                <!-- System Status -->
+                <div class="chart-card">
+                    <h3><i class="fas fa-server"></i> System Status</h3>
+                    <div class="info-item">
+                        <span>Database:</span>
+                        <strong class="status-active" id="dbStatus">Connected</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>API Status:</span>
+                        <strong class="status-active" id="apiStatusDash">Active</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Memory Usage:</span>
+                        <strong id="memoryUsage">Loading...</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Response Time:</span>
+                        <strong id="responseTime">Loading...</strong>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="chart-card">
+                    <h3><i class="fas fa-chart-pie"></i> Quick Stats</h3>
+                    <div class="info-item">
+                        <span>New Users (7 days):</span>
+                        <strong id="newUsers7d">0</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Active Sessions:</span>
+                        <strong id="activeSessions">0</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>API Calls Today:</span>
+                        <strong id="apiCallsToday">0</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Avg Response:</span>
+                        <strong id="avgResponse">0ms</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-charts">
+                <div class="chart-card">
+                    <h3><i class="fas fa-users"></i> Recent Users</h3>
+                    <div id="recentUsersList"></div>
+                </div>
+                <div class="chart-card">
+                    <h3><i class="fas fa-history"></i> System Activity</h3>
+                    <div id="activityLog"></div>
+                </div>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="content-card" style="margin-top: 2rem;">
+                <h3><i class="fas fa-tasks"></i> Bulk Actions</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <button class="btn-primary" onclick="bulkEmailUsers()">
+                        <i class="fas fa-envelope"></i> Email All Users
+                    </button>
+                    <button class="btn-warning" onclick="resetAllPasswords()">
+                        <i class="fas fa-key"></i> Reset Passwords
+                    </button>
+                    <button class="btn-secondary" onclick="exportAllData()">
+                        <i class="fas fa-download"></i> Export All Data
+                    </button>
+                    <button class="btn-danger" onclick="clearOldData()">
+                        <i class="fas fa-trash"></i> Clear Old Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Notifications Center -->
+            <div class="content-card" style="margin-top: 2rem;">
+                <h3><i class="fas fa-bell"></i> Notifications Center</h3>
+                <div id="notificationsCenter" style="max-height: 300px; overflow-y: auto;">
+                    <!-- Notifications will be populated here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Users Management Section -->
+        <section id="users" class="content-section">
+            <div class="section-header">
+                <h1>Users Management</h1>
+                <button class="btn-primary" id="addUserBtn">
+                    <i class="fas fa-plus"></i>
+                    Add New User
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Full Name</th>
+                            <th>Admin</th>
+                            <th>Created</th>
+                            <th>Last Login</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Locations Section -->
+        <section id="locations" class="content-section">
+            <div class="section-header">
+                <h1>All Saved Locations</h1>
+                <div class="filter-group">
+                    <select id="userFilter" class="filter-select">
+                        <option value="">All Users</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Location</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                            <th>Favorite</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="locationsTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Alerts Section -->
+        <section id="alerts" class="content-section">
+            <div class="section-header">
+                <h1>Weather Alerts Management</h1>
+            </div>
+
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Alert Type</th>
+                            <th>Threshold</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="alertsTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center;">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Content Management Section -->
+        <section id="content" class="content-section">
+            <div class="section-header">
+                <h1>Landing Page Content Management</h1>
+                <button class="btn-primary" id="saveContentBtn">
+                    <i class="fas fa-save"></i>
+                    Save All Changes
+                </button>
+            </div>
+
+            <div class="content-editor">
+                <!-- Hero Section -->
+                <div class="editor-card">
+                    <h3><i class="fas fa-star"></i> Hero Section</h3>
+                    <div class="form-group">
+                        <label>Main Title (Line 1)</label>
+                        <input type="text" id="heroTitle1" class="form-control" value="Experience Weather">
+                    </div>
+                    <div class="form-group">
+                        <label>Main Title (Line 2)</label>
+                        <input type="text" id="heroTitle2" class="form-control" value="Like Never Before">
+                    </div>
+                    <div class="form-group">
+                        <label>Subtitle</label>
+                        <textarea id="heroSubtitle" class="form-control" rows="2">Real-time weather updates, stunning visualizations, and intelligent forecasts all in one beautiful dashboard</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Primary Button Text</label>
+                        <input type="text" id="heroBtnPrimary" class="form-control" placeholder="Experience Now">
+                    </div>
+                    <div class="form-group">
+                        <label>Secondary Button Text</label>
+                        <input type="text" id="heroBtnSecondary" class="form-control" placeholder="Learn More">
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="editor-card">
+                    <h3><i class="fas fa-chart-bar"></i> Statistics</h3>
+                    <div class="stats-editor">
+                        <div class="form-group">
+                            <label>Active Users Count</label>
+                            <input type="text" id="statUsers" class="form-control" value="10K+">
+                        </div>
+                        <div class="form-group">
+                            <label>Accuracy Percentage</label>
+                            <input type="text" id="statAccuracy" class="form-control" value="99.9%">
+                        </div>
+                        <div class="form-group">
+                            <label>Live Updates</label>
+                            <input type="text" id="statUpdates" class="form-control" value="24/7">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Section -->
+                <div class="editor-card">
+                    <h3><i class="fas fa-list"></i> Features Section</h3>
+                    <div class="form-group">
+                        <label>Section Title</label>
+                        <input type="text" id="featuresTitle" class="form-control" value="Powerful Features">
+                    </div>
+                    <div class="form-group">
+                        <label>Section Subtitle</label>
+                        <input type="text" id="featuresSubtitle" class="form-control" value="Everything you need to stay ahead of the weather">
+                    </div>
+                    
+                    <h4 style="margin-top: 1.5rem;">Feature Cards</h4>
+                    <div id="featuresList">
+                        <!-- Feature 1 -->
+                        <div class="feature-editor">
+                            <div class="form-group">
+                                <label>Feature 1 - Title</label>
+                                <input type="text" class="form-control feature-title" value="Location-Based">
+                            </div>
+                            <div class="form-group">
+                                <label>Feature 1 - Description</label>
+                                <textarea class="form-control feature-desc" rows="2">Automatic location detection with permission-based access for accurate local weather</textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Feature 2 -->
+                        <div class="feature-editor">
+                            <div class="form-group">
+                                <label>Feature 2 - Title</label>
+                                <input type="text" class="form-control feature-title" value="7-Day Forecast">
+                            </div>
+                            <div class="form-group">
+                                <label>Feature 2 - Description</label>
+                                <textarea class="form-control feature-desc" rows="2">Detailed hourly and daily forecasts with interactive charts and visualizations</textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Feature 3 -->
+                        <div class="feature-editor">
+                            <div class="form-group">
+                                <label>Feature 3 - Title</label>
+                                <input type="text" class="form-control feature-title" value="Smart Alerts">
+                            </div>
+                            <div class="form-group">
+                                <label>Feature 3 - Description</label>
+                                <textarea class="form-control feature-desc" rows="2">Get notified about severe weather conditions and important updates</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- About Section -->
+                <div class="editor-card">
+                    <h3><i class="fas fa-info-circle"></i> About Section</h3>
+                    <div class="form-group">
+                        <label>Section Title</label>
+                        <input type="text" id="aboutTitle" class="form-control" value="Why Choose WeatherPro?">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="aboutDesc" class="form-control" rows="3">WeatherPro combines cutting-edge technology with beautiful design to deliver the most comprehensive weather experience. Our platform uses advanced algorithms and real-time data from multiple sources to provide you with the most accurate forecasts.</textarea>
+                    </div>
+                </div>
+
+                <!-- CTA Section -->
+                <div class="editor-card">
+                    <h3><i class="fas fa-bullhorn"></i> Call-to-Action Section</h3>
+                    <div class="form-group">
+                        <label>CTA Title</label>
+                        <input type="text" id="ctaTitle" class="form-control" value="Ready to Experience the Future of Weather?">
+                    </div>
+                    <div class="form-group">
+                        <label>CTA Subtitle</label>
+                        <input type="text" id="ctaSubtitle" class="form-control" value="Join thousands of users who trust WeatherPro for their daily weather needs">
+                    </div>
+                    <div class="form-group">
+                        <label>CTA Button Text</label>
+                        <input type="text" id="ctaButton" class="form-control" value="Get Started Now">
+                    </div>
+                </div>
+
+                <!-- Footer Management -->
+                <div class="editor-card">
+                    <h3><i class="fas fa-shoe-prints"></i> Footer Management</h3>
+                    
+                    <!-- Contact Information -->
+                    <h4 style="margin-top: 1.5rem; margin-bottom: 1rem; color: var(--text-dark);">Contact Information</h4>
+                    <div class="form-group">
+                        <label>Contact Email</label>
+                        <input type="email" id="contactEmail" class="form-control" placeholder="info@weatherpro.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Phone</label>
+                        <input type="text" id="contactPhone" class="form-control" placeholder="+1 (555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Address</label>
+                        <input type="text" id="contactAddress" class="form-control" placeholder="San Francisco, CA">
+                    </div>
+                    
+                    <!-- Quick Links -->
+                    <h4 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--text-dark);">Quick Links</h4>
+                    <div class="form-group">
+                        <label>Quick Link Email</label>
+                        <input type="email" id="quickLinkEmail" class="form-control" placeholder="info@weatherpro.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Quick Link Phone</label>
+                        <input type="text" id="quickLinkPhone" class="form-control" placeholder="+91 7416002610">
+                    </div>
+                    <div class="form-group">
+                        <label>Quick Link Address</label>
+                        <input type="text" id="quickLinkAddress" class="form-control" placeholder="Hyderabad, Telangana, India">
+                    </div>
+                    
+                    <!-- Social Media Links -->
+                    <h4 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--text-dark);">Social Media Links</h4>
+                    <div class="form-group">
+                        <label><i class="fab fa-facebook"></i> Facebook URL</label>
+                        <input type="url" id="socialFacebook" class="form-control" placeholder="https://facebook.com/weatherpro">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fab fa-twitter"></i> Twitter URL</label>
+                        <input type="url" id="socialTwitter" class="form-control" placeholder="https://twitter.com/weatherpro">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fab fa-instagram"></i> Instagram URL</label>
+                        <input type="url" id="socialInstagram" class="form-control" placeholder="https://instagram.com/weatherpro">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fab fa-linkedin"></i> LinkedIn URL</label>
+                        <input type="url" id="socialLinkedin" class="form-control" placeholder="https://linkedin.com/company/weatherpro">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fab fa-youtube"></i> YouTube URL</label>
+                        <input type="url" id="socialYoutube" class="form-control" placeholder="https://youtube.com/@weatherpro">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fab fa-github"></i> GitHub URL</label>
+                        <input type="url" id="socialGithub" class="form-control" placeholder="https://github.com/weatherpro">
+                    </div>
+                    
+                    <!-- Company Info -->
+                    <h4 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--text-dark);">Company Information</h4>
+                    <div class="form-group">
+                        <label>Company Name</label>
+                        <input type="text" id="companyName" class="form-control" placeholder="WeatherPro">
+                    </div>
+                    <div class="form-group">
+                        <label>Company Description</label>
+                        <textarea id="companyDescription" class="form-control" rows="3" placeholder="Your ultimate weather companion for accurate forecasts and beautiful visualizations."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Copyright Text</label>
+                        <input type="text" id="copyrightText" class="form-control" placeholder="© 2024 WeatherPro. All rights reserved.">
+                    </div>
+                    
+                    <div class="form-actions" style="margin-top: 2rem;">
+                        <button class="btn-preview" onclick="window.open('/', '_blank')">
+                            <i class="fas fa-eye"></i> Preview Landing Page
+                        </button>
+                        <button class="btn-save" onclick="saveFooterContent()">
+                            <i class="fas fa-save"></i> Save Footer Content
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Preview Button -->
+                <div class="editor-actions">
+                    <button class="btn-secondary btn-large" onclick="window.open('/', '_blank')">
+                        <i class="fas fa-eye"></i>
+                        Preview Landing Page
+                    </button>
+                    <button class="btn-primary btn-large" id="saveContentBtn2">
+                        <i class="fas fa-save"></i>
+                        Save All Changes
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Login Activity Section -->
+        <section id="activity" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-history"></i> Login & Logout Activity</h1>
+                <p>Track all user login and logout activities with timestamps</p>
+            </div>
+
+            <!-- Activity Stats -->
+            <div class="stats-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card-admin">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="fas fa-sign-in-alt"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="totalLogins" style="font-size: 2.5rem !important; font-weight: 800 !important; margin: 0.5rem 0 !important; text-shadow: none !important; opacity: 1 !important; display: block !important;">0</h3>
+                        <p style="font-size: 0.95rem !important; margin: 0 !important; opacity: 1 !important; display: block !important; font-weight: 600 !important;">Total Logins Today</p>
+                    </div>
+                </div>
+
+                <div class="stat-card-admin">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="totalLogouts" style="font-size: 2.5rem !important; font-weight: 800 !important; margin: 0.5rem 0 !important; text-shadow: none !important; opacity: 1 !important; display: block !important;">0</h3>
+                        <p style="font-size: 0.95rem !important; margin: 0 !important; opacity: 1 !important; display: block !important; font-weight: 600 !important;">Total Logouts Today</p>
+                    </div>
+                </div>
+
+                <div class="stat-card-admin">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="activeNow" style="font-size: 2.5rem !important; font-weight: 800 !important; margin: 0.5rem 0 !important; text-shadow: none !important; opacity: 1 !important; display: block !important;">0</h3>
+                        <p style="font-size: 0.95rem !important; margin: 0 !important; opacity: 1 !important; display: block !important; font-weight: 600 !important;">Currently Active</p>
+                    </div>
+                </div>
+
+                <div class="stat-card-admin">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3 id="avgSessionTime" style="font-size: 2.5rem !important; font-weight: 800 !important; margin: 0.5rem 0 !important; text-shadow: none !important; opacity: 1 !important; display: block !important;">0m</h3>
+                        <p style="font-size: 0.95rem !important; margin: 0 !important; opacity: 1 !important; display: block !important; font-weight: 600 !important;">Avg Session Time</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Filters -->
+            <div class="content-card" style="margin-bottom: 1.5rem;">
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <input type="text" id="activitySearch" class="form-control" placeholder="Search by username or email...">
+                    </div>
+                    <select id="activityTypeFilter" class="filter-select">
+                        <option value="all">All Activities</option>
+                        <option value="login">Logins Only</option>
+                        <option value="logout">Logouts Only</option>
+                    </select>
+                    <select id="activityDateFilter" class="filter-select">
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="all">All Time</option>
+                    </select>
+                    <button class="btn-primary" onclick="loadActivityLogs()" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
+                        <i class="fas fa-sync-alt" style="color: white;"></i> Refresh
+                    </button>
+                    <button class="btn-export-activity" onclick="exportActivityLogs()" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                        <i class="fas fa-download" style="color: white;"></i> Export
+                    </button>
+                </div>
+            </div>
+
+            <!-- Activity Table -->
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Activity</th>
+                            <th>IP Address</th>
+                            <th>Device</th>
+                            <th>Date & Time</th>
+                            <th>Session Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 2rem;">
+                                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary);"></i>
+                                <p style="margin-top: 1rem;">Loading activity logs...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Live Activity Feed -->
+            <div class="content-card" style="margin-top: 2rem;">
+                <h3><i class="fas fa-rss"></i> Live Activity Feed</h3>
+                <div id="liveActivityFeed" style="max-height: 400px; overflow-y: auto;">
+                    <!-- Live activities will appear here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section id="settings" class="content-section">
+            <div class="section-header">
+                <h1>System Settings</h1>
+                <p>Manage system configuration and maintenance</p>
+            </div>
+
+            <div class="settings-grid">
+                <!-- Database Info -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-database"></i> Database Info</h3>
+                    <div class="info-item">
+                        <span>Database:</span>
+                        <strong id="dbName">weather_dashboard</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Total Users:</span>
+                        <strong id="dbUsers">Loading...</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Total Locations:</span>
+                        <strong id="dbLocations">Loading...</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Total Alerts:</span>
+                        <strong id="dbAlerts">Loading...</strong>
+                    </div>
+                    <button class="btn-secondary" id="backupDbBtn" style="width: 100%; margin-top: 1rem;">
+                        <i class="fas fa-download"></i>
+                        Export Database Info
+                    </button>
+                </div>
+
+                <!-- API Configuration -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-key"></i> API Configuration</h3>
+                    <div class="info-item">
+                        <span>Weather API:</span>
+                        <strong>OpenWeatherMap</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Status:</span>
+                        <strong class="status-active" id="apiStatus">Active</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>API Key:</span>
+                        <strong id="apiKeyDisplay">••••••••••••</strong>
+                    </div>
+                    <button class="btn-secondary" id="testApiBtn" style="width: 100%; margin-top: 1rem;">
+                        <i class="fas fa-vial"></i>
+                        Test API Connection
+                    </button>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-shield-alt"></i> Security</h3>
+                    <div class="setting-toggle">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <label class="switch">
+                                <input type="checkbox" id="requireEmailVerification">
+                                <span class="slider"></span>
+                            </label>
+                            <span>Require Email Verification</span>
+                        </div>
+                    </div>
+                    <div class="setting-toggle">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <label class="switch">
+                                <input type="checkbox" id="enableRateLimit" checked>
+                                <span class="slider"></span>
+                            </label>
+                            <span>Enable Rate Limiting</span>
+                        </div>
+                    </div>
+                    <div class="setting-toggle">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <label class="switch">
+                                <input type="checkbox" id="enable2FA">
+                                <span class="slider"></span>
+                            </label>
+                            <span>Two-Factor Authentication</span>
+                        </div>
+                    </div>
+                    <button class="btn-primary" id="saveSecurityBtn" style="width: 100%; margin-top: 1rem;">
+                        <i class="fas fa-save"></i>
+                        Save Security Settings
+                    </button>
+                </div>
+
+                <!-- Maintenance -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-tools"></i> Maintenance</h3>
+                    <button class="btn-warning" id="clearCacheBtn" style="width: 100%; margin-bottom: 0.5rem;">
+                        <i class="fas fa-broom"></i>
+                        Clear Cache
+                    </button>
+                    <button class="btn-danger" id="deleteInactiveBtn" style="width: 100%; margin-bottom: 0.5rem;">
+                        <i class="fas fa-user-times"></i>
+                        Delete Inactive Users (90+ days)
+                    </button>
+                    <button class="btn-secondary" id="optimizeDbBtn" style="width: 100%;">
+                        <i class="fas fa-database"></i>
+                        Optimize Database
+                    </button>
+                </div>
+                
+                <!-- System Info -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-info-circle"></i> System Information</h3>
+                    <div class="info-item">
+                        <span>Server Status:</span>
+                        <strong class="status-active">Online</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Node Version:</span>
+                        <strong id="nodeVersion">Loading...</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Uptime:</span>
+                        <strong id="serverUptime">Loading...</strong>
+                    </div>
+                    <div class="info-item">
+                        <span>Last Backup:</span>
+                        <strong id="lastBackup">Never</strong>
+                    </div>
+                </div>
+                
+                <!-- Email Settings -->
+                <div class="settings-card">
+                    <h3><i class="fas fa-envelope"></i> Email Configuration</h3>
+                    <div class="form-group">
+                        <label>SMTP Server</label>
+                        <input type="text" id="smtpServer" class="form-control" placeholder="smtp.gmail.com" value="smtp.gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label>SMTP Port</label>
+                        <input type="number" id="smtpPort" class="form-control" placeholder="587" value="587">
+                    </div>
+                    <div class="form-group">
+                        <label>From Email</label>
+                        <input type="email" id="fromEmail" class="form-control" placeholder="noreply@weatherpro.com" value="noreply@weatherpro.com">
+                    </div>
+                    <button class="btn-primary" id="saveEmailBtn" style="width: 100%; margin-top: 0.5rem;">
+                        <i class="fas fa-save"></i>
+                        Save Email Settings
+                    </button>
+                </div>
+            </div>
+        </section>
+            </div>
+        </section>
+    </main>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="modal-overlay" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Edit User</h3>
+                <button class="modal-close" onclick="closeModal('editUserModal')">&times;</button>
+            </div>
+            <div class="modal-content">
+                <input type="hidden" id="editUserId">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="editUsername" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="editEmail" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="editFullName" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="editIsAdmin">
+                        <span>Admin Privileges</span>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('editUserModal')">Cancel</button>
+                <button class="btn-primary" onclick="saveUser()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <i class="fas fa-cloud-sun fa-spin"></i>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal-overlay" id="addUserModal" style="display: none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> Add New User</h3>
+                <button class="modal-close" onclick="closeModal('addUserModal')">&times;</button>
+            </div>
+            <div class="modal-content">
+                <form id="addUserForm" onsubmit="return false;">
+                    <div class="form-group">
+                        <label>Username *</label>
+                        <input type="text" id="newUsername" class="form-control" required placeholder="Enter username">
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="newEmail" class="form-control" required placeholder="Enter email">
+                    </div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="newFullName" class="form-control" placeholder="Enter full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Password *</label>
+                        <input type="password" id="newPassword" class="form-control" required placeholder="Enter password (min 6 characters)" minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="newIsAdmin" style="width: auto; margin-right: 0.5rem;">
+                            Make this user an administrator
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('addUserModal')">Cancel</button>
+                <button class="btn-primary" onclick="createUser()">
+                    <i class="fas fa-plus"></i> Create User
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Success!</span>
+    </div>
+
+    <script src="js/admin.js?v=2.0"></script>
+    <script src="js/admin-premium.js?v=2.0"></script>
+    <script>
+        // Force premium features to load
+        console.log('%c✨ Premium Admin Panel Loaded!', 'color: #8b5cf6; font-size: 20px; font-weight: bold;');
+        console.log('%cFeatures: Quick Actions, Glass Effects, Sparklines, Animations', 'color: #10b981; font-size: 14px;');
+    </script>
+</body>
+</html>

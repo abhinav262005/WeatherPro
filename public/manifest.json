@@ -1,0 +1,35 @@
+{
+  "name": "Ultra Weather Dashboard",
+  "short_name": "Ultra Weather",
+  "description": "Hyper-advanced, cinematic weather dashboard with extreme personalization",
+  "start_url": "/ultra",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["weather", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Current Weather",
+      "short_name": "Weather",
+      "description": "View current weather conditions",
+      "url": "/ultra",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -1,0 +1,273 @@
+/* ============================================
+   ANIMATED GRADIENT PRESETS
+   ============================================ */
+
+/* Dawn Gradient */
+[data-gradient="dawn"] .gradient-layer.layer-1 {
+    background: linear-gradient(135deg, #FFDEE9 0%, #FECFEF 50%, #B5FFFC 100%);
+    animation: gradientShift 15s ease infinite;
+}
+
+[data-gradient="dawn"] .gradient-layer.layer-2 {
+    background: radial-gradient(circle at 30% 50%, rgba(255, 222, 233, 0.6), transparent 70%);
+    animation: pulseGlow 8s ease-in-out infinite;
+}
+
+[data-gradient="dawn"] .gradient-layer.layer-3 {
+    background: linear-gradient(45deg, transparent 30%, rgba(181, 255, 252, 0.3) 70%);
+    animation: waveMove 12s linear infinite;
+}
+
+/* Sunrise Gradient */
+[data-gradient="sunrise"] .gradient-layer.layer-1 {
+    background: linear-gradient(135deg, #FF9A9E 0%, #FAD0C4 100%);
+    animation: gradientShift 15s ease infinite;
+}
+
+[data-gradient="sunrise"] .gradient-layer.layer-2 {
+    background: radial-gradient(circle at 70% 30%, rgba(255, 154, 158, 0.5), transparent 60%);
+    animation: pulseGlow 10s ease-in-out infinite;
+}
+
+[data-gradient="sunrise"] .gradient-layer.layer-3 {
+    background: linear-gradient(90deg, transparent, rgba(250, 208, 196, 0.4), transparent);
+    animation: lightRay 8s linear infinite;
+}
+
+/* Day Gradient */
+[data-gradient="day"] .gradient-layer.layer-1 {
+    background: linear-gradient(135deg, #A1C4FD 0%, #C2E9FB 100%);
+    animation: gradientShift 20s ease infinite;
+}
+
+[data-gradient="day"] .gradient-layer.layer-2 {
+    background: radial-gradient(circle at 50% 20%, rgba(161, 196, 253, 0.4), transparent 70%);
+    animation: cloudFloat 15s ease-in-out infinite;
+}
+
+[data-gradient="day"] .gradient-layer.layer-3 {
+    background: linear-gradient(180deg, transparent 50%, rgba(194, 233, 251, 0.3) 100%);
+    animation: skyShimmer 10s ease infinite;
+}
+
+/* Twilight Gradient */
+[data-gradient="twilight"] .gradient-layer.layer-1 {
+    background: linear-gradient(135deg, #2C3E50 0%, #4CA1AF 50%, #667EEA 100%);
+    animation: gradientShift 18s ease infinite;
+}
+
+[data-gradient="twilight"] .gradient-layer.layer-2 {
+    background: radial-gradient(circle at 40% 40%, rgba(76, 161, 175, 0.5), transparent 65%);
+    animation: pulseGlow 12s ease-in-out infinite;
+}
+
+[data-gradient="twilight"] .gradient-layer.layer-3 {
+    background: linear-gradient(45deg, rgba(102, 126, 234, 0.3), transparent 50%, rgba(44, 62, 80, 0.3));
+    animation: twilightWave 14s linear infinite;
+}
+
+/* Storm Gradient */
+[data-gradient="storm"] .gradient-layer.layer-1 {
+    background: linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%);
+    animation: stormShift 10s ease infinite;
+}
+
+[data-gradient="storm"] .gradient-layer.layer-2 {
+    background: radial-gradient(circle at 60% 60%, rgba(32, 58, 67, 0.7), transparent 50%);
+    animation: thunderPulse 3s ease-in-out infinite;
+}
+
+[data-gradient="storm"] .gradient-layer.layer-3 {
+    background: linear-gradient(90deg, transparent, rgba(44, 83, 100, 0.5), transparent);
+    animation: lightningFlash 7s linear infinite;
+}
+
+/* Aurora Gradient */
+[data-gradient="aurora"] .gradient-layer.layer-1 {
+    background: linear-gradient(135deg, #0FD3FF 0%, #7F00FF 50%, #00D2FF 100%);
+    animation: auroraFlow 20s ease infinite;
+}
+
+[data-gradient="aurora"] .gradient-layer.layer-2 {
+    background: radial-gradient(ellipse at 30% 50%, rgba(127, 0, 255, 0.6), transparent 70%);
+    animation: auroraWave 15s ease-in-out infinite;
+}
+
+[data-gradient="aurora"] .gradient-layer.layer-3 {
+    background: linear-gradient(45deg, rgba(15, 211, 255, 0.4), transparent 40%, rgba(0, 210, 255, 0.4));
+    animation: auroraDance 12s linear infinite;
+}
+
+/* ============================================
+   GRADIENT ANIMATIONS
+   ============================================ */
+
+@keyframes gradientShift {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.1) rotate(5deg);
+        opacity: 1;
+    }
+}
+
+@keyframes pulseGlow {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.9;
+    }
+}
+
+@keyframes waveMove {
+    0% {
+        transform: translateX(-50%) translateY(0);
+    }
+    50% {
+        transform: translateX(0) translateY(-20px);
+    }
+    100% {
+        transform: translateX(50%) translateY(0);
+    }
+}
+
+@keyframes lightRay {
+    0% {
+        transform: translateX(-100%) rotate(-10deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateX(200%) rotate(-10deg);
+        opacity: 0;
+    }
+}
+
+@keyframes cloudFloat {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(30px, -20px);
+    }
+}
+
+@keyframes skyShimmer {
+    0%, 100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+@keyframes twilightWave {
+    0% {
+        transform: translateX(-100%) skewX(-10deg);
+    }
+    100% {
+        transform: translateX(100%) skewX(-10deg);
+    }
+}
+
+@keyframes stormShift {
+    0%, 100% {
+        transform: scale(1.05);
+        filter: brightness(0.8);
+    }
+    50% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+}
+
+@keyframes thunderPulse {
+    0%, 90%, 100% {
+        opacity: 0.7;
+    }
+    95% {
+        opacity: 1;
+        filter: brightness(1.5);
+    }
+}
+
+@keyframes lightningFlash {
+    0%, 100% {
+        opacity: 0;
+    }
+    10%, 12% {
+        opacity: 1;
+        filter: brightness(2);
+    }
+    11% {
+        opacity: 0.3;
+    }
+}
+
+@keyframes auroraFlow {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+        filter: hue-rotate(0deg);
+    }
+    50% {
+        transform: scale(1.15) rotate(10deg);
+        filter: hue-rotate(30deg);
+    }
+}
+
+@keyframes auroraWave {
+    0%, 100% {
+        transform: translateY(0) scaleY(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translateY(-50px) scaleY(1.3);
+        opacity: 0.9;
+    }
+}
+
+@keyframes auroraDance {
+    0% {
+        transform: translateX(-30%) translateY(0) rotate(-5deg);
+        opacity: 0.4;
+    }
+    50% {
+        transform: translateX(30%) translateY(-30px) rotate(5deg);
+        opacity: 0.7;
+    }
+    100% {
+        transform: translateX(-30%) translateY(0) rotate(-5deg);
+        opacity: 0.4;
+    }
+}
+
+/* ============================================
+   FOG & PARTICLE EFFECTS
+   ============================================ */
+
+.fog-layer {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+    animation: fogDrift 30s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes fogDrift {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    100% {
+        transform: translate(50px, 30px) rotate(360deg);
+    }
+}

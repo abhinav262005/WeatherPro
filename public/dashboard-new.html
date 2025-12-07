@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherPro - Ultimate Dashboard</title>
+    <link rel="stylesheet" href="css/dashboard-ultimate.css">`n    <link rel="stylesheet" href="css/disable-all-loading.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">`n    <link rel="stylesheet" href="css/disable-all-loading.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />`n    <link rel="stylesheet" href="css/disable-all-loading.css">
+</head>
+<body>
+    <!-- Customization Panel (Floating) -->
+    <div class="customization-panel" id="customPanel">
+        <button class="panel-toggle" id="panelToggle">
+            <i class="fas fa-palette"></i>
+        </button>
+        <div class="panel-content">
+            <h3><i class="fas fa-magic"></i> Customize Dashboard</h3>
+            
+            <div class="custom-section">
+                <label>Theme</label>
+                <div class="theme-selector">
+                    <button class="theme-btn active" data-theme="gradient">
+                        <span class="theme-preview gradient-preview"></span>
+                        Gradient
+                    </button>
+                    <button class="theme-btn" data-theme="dark">
+                        <span class="theme-preview dark-preview"></span>
+                        Dark
+                    </button>
+                    <button class="theme-btn" data-theme="light">
+                        <span class="theme-preview light-preview"></span>
+                        Light
+                    </button>
+                    <button class="theme-btn" data-theme="ocean">
+                        <span class="theme-preview ocean-preview"></span>
+                        Ocean
+                    </button>
+                </div>
+            </div>
+
+            <div class="custom-section">
+                <label>Accent Color</label>
+                <div class="color-picker">
+                    <input type="color" id="accentColor" value="#667eea">
+                </div>
+            </div>
+
+            <div class="custom-section">
+                <label>Layout</label>
+                <select id="layoutStyle" class="custom-select">
+                    <option value="modern">Modern Grid</option>
+                    <option value="compact">Compact</option>
+                    <option value="spacious">Spacious</option>
+                    <option value="cards">Card Layout</option>
+                </select>
+            </div>
+
+            <div class="custom-section">
+                <label>Font Size</label>
+                <input type="range" id="fontSize" min="12" max="20" value="16" class="custom-slider">
+                <span id="fontSizeValue">16px</span>
+            </div>
+
+            <div class="custom-section">
+                <label>Animation Speed</label>
+                <select id="animationSpeed" class="custom-select">
+                    <option value="slow">Slow</option>
+                    <option value="normal" selected>Normal</option>
+                    <option value="fast">Fast</option>
+                    <option value="none">No Animation</option>
+                </select>
+            </div>
+
+            <div class="custom-section">
+                <label>Weather Effects</label>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="weatherEffects" checked>
+                    <label for="weatherEffects"></label>
+                </div>
+            </div>
+
+            <div class="custom-section">
+                <label>Background Blur</label>
+                <input type="range" id="bgBlur" min="0" max="30" value="20" class="custom-slider">
+                <span id="bgBlurValue">20px</span>
+            </div>
+
+            <button class="btn-save-custom" id="saveCustom">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+            <button class="btn-reset-custom" id="resetCustom">
+                <i class="fas fa-undo"></i> Reset to Default
+            </button>
+        </div>
+    </div>
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <div class="logo">
+                <i class="fas fa-cloud-sun"></i>
+                <span>WeatherPro</span>
+            </div>
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="globalSearch" placeholder="Search location, city, or coordinates...">
+                <button class="voice-search" id="voiceSearch">
+                    <i class="fas fa-microphone"></i>
+                </button>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button class="nav-btn" id="notificationBtn">
+                <i class="fas fa-bell"></i>
+                <span class="badge">5</span>
+            </button>
+            <button class="nav-btn" id="widgetBtn">
+                <i class="fas fa-th"></i>
+            </button>
+            <button class="nav-btn" id="fullscreenBtn">
+                <i class="fas fa-expand"></i>
+            </button>
+            <div class="user-menu">
+                <img src="https://ui-avatars.com/api/?name=User&background=667eea&color=fff" alt="User" class="user-avatar">
+                <div class="user-dropdown">
+                    <a href="#"><i class="fas fa-user"></i> Profile</a>
+                    <a href="#"><i class="fas fa-cog"></i> Settings</a>
+                    <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-menu">
+                <a href="#" class="menu-item active" data-view="overview">
+                    <i class="fas fa-home"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="#" class="menu-item" data-view="forecast">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Forecast</span>
+                </a>
+                <a href="#" class="menu-item" data-view="map">
+                    <i class="fas fa-map"></i>
+                    <span>Live Map</span>
+                </a>
+                <a href="#" class="menu-item" data-view="radar">
+                    <i class="fas fa-satellite-dish"></i>
+                    <span>Radar</span>
+                </a>
+                <a href="#" class="menu-item" data-view="cities">
+                    <i class="fas fa-city"></i>
+                    <span>Cities</span>
+                </a>
+                <a href="#" class="menu-item" data-view="favorites">
+                    <i class="fas fa-star"></i>
+                    <span>Favorites</span>
+                </a>
+                <a href="#" class="menu-item" data-view="compare">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Compare</span>
+                </a>
+                <a href="#" class="menu-item" data-view="history">
+                    <i class="fas fa-history"></i>
+                    <span>History</span>
+                </a>
+                <a href="#" class="menu-item" data-view="widgets">
+                    <i class="fas fa-puzzle-piece"></i>
+                    <span>Widgets</span>
+                </a>
+                <a href="#" class="menu-item" data-view="analytics">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Overview Section -->
+            <section class="view-section active" id="overview">
+                <!-- Quick Stats Bar -->
+                <div class="quick-stats-bar">
+                    <div class="stat-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <span class="stat-label">Location</span>
+                            <span class="stat-value" id="currentLocation">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <span class="stat-label">Local Time</span>
+                            <span class="stat-value" id="localTime">--:--</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-sun"></i>
+                        <div>
+                            <span class="stat-label">Sunrise</span>
+                            <span class="stat-value" id="sunriseTime">--:--</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-moon"></i>
+                        <div>
+                            <span class="stat-label">Sunset</span>
+                            <span class="stat-value" id="sunsetTime">--:--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Weather Display -->
+                <div class="weather-hero">
+                    <div class="weather-main-info">
+                        <div class="weather-icon-large" id="mainIcon">
+                            <i class="fas fa-cloud-sun"></i>
+                        </div>
+                        <div class="weather-temp-display">
+                            <span class="temp-large" id="mainTemp">--</span>
+                            <span class="temp-unit">°C</span>
+                        </div>
+                        <div class="weather-description">
+                            <h2 id="weatherCondition">Loading...</h2>
+                            <p id="weatherDesc">Fetching weather data...</p>
+                        </div>
+                    </div>
+                    <div class="weather-details-panel">
+                        <div class="detail-card">
+                            <i class="fas fa-temperature-high"></i>
+                            <div>
+                                <span class="detail-label">Feels Like</span>
+                                <span class="detail-value" id="feelsLike">--°</span>
+                            </div>
+                        </div>
+                        <div class="detail-card">
+                            <i class="fas fa-wind"></i>
+                            <div>
+                                <span class="detail-label">Wind Speed</span>
+                                <span class="detail-value" id="windSpeed">-- km/h</span>
+                            </div>
+                        </div>
+                        <div class="detail-card">
+                            <i class="fas fa-tint"></i>
+                            <div>
+                                <span class="detail-label">Humidity</span>
+                                <span class="detail-value" id="humidity">--%</span>
+                            </div>
+                        </div>
+                        <div class="detail-card">
+                            <i class="fas fa-eye"></i>
+                            <div>
+                                <span class="detail-label">Visibility</span>
+                                <span class="detail-value" id="visibility">-- km</span>
+                            </div>
+                        </div>
+                        <div class="detail-card">
+                            <i class="fas fa-compress-arrows-alt"></i>
+                            <div>
+                                <span class="detail-label">Pressure</span>
+                                <span class="detail-value" id="pressure">-- hPa</span>
+                            </div>
+                        </div>
+                        <div class="detail-card">
+                            <i class="fas fa-cloud"></i>
+                            <div>
+                                <span class="detail-label">Cloud Cover</span>
+                                <span class="detail-value" id="cloudCover">--%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hourly Forecast -->
+                <div class="section-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-clock"></i> Hourly Forecast</h3>
+                        <button class="btn-icon"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div class="hourly-scroll" id="hourlyForecast">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Additional Info Grid -->
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h4><i class="fas fa-sun"></i> UV Index</h4>
+                        <div class="uv-display">
+                            <div class="uv-meter">
+                                <div class="uv-fill" id="uvFill"></div>
+                            </div>
+                            <span class="uv-value" id="uvIndex">--</span>
+                            <span class="uv-level" id="uvLevel">--</span>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h4><i class="fas fa-wind"></i> Air Quality</h4>
+                        <div class="aqi-display">
+                            <div class="aqi-circle" id="aqiCircle">
+                                <span id="aqiValue">--</span>
+                            </div>
+                            <span class="aqi-status" id="aqiStatus">Good</span>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h4><i class="fas fa-water"></i> Precipitation</h4>
+                        <div class="precip-chart" id="precipChart">
+                            <canvas id="precipCanvas"></canvas>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <h4><i class="fas fa-compass"></i> Wind Direction</h4>
+                        <div class="wind-compass" id="windCompass">
+                            <div class="compass-arrow" id="compassArrow"></div>
+                            <span class="wind-direction" id="windDirection">N</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Other sections will be added here -->
+            <section class="view-section" id="forecast">
+                <h2>7-Day Forecast</h2>
+                <div class="forecast-grid" id="forecastGrid"></div>
+            </section>
+
+            <section class="view-section" id="map">
+                <h2>Interactive Weather Map</h2>
+                <div id="weatherMap" class="map-container"></div>
+            </section>
+
+            <section class="view-section" id="cities">
+                <h2>Popular Cities</h2>
+                <div class="cities-grid" id="citiesGrid"></div>
+            </section>
+
+            <section class="view-section" id="favorites">
+                <h2>My Favorites</h2>
+                <div class="favorites-grid" id="favoritesGrid"></div>
+            </section>
+
+            <section class="view-section" id="compare">
+                <h2>Compare Locations</h2>
+                <div class="compare-container" id="compareContainer"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Weather Animation Canvas -->
+    <canvas id="weatherCanvas" class="weather-canvas"></canvas>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader">
+            <i class="fas fa-cloud-sun fa-spin"></i>
+            <p>Loading Weather Data...</p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/weather-effects.js"></script>
+    <script src="js/dashboard-ultimate.js"></script>
+</body>
+</html>
+

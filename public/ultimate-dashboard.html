@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherPro Ultimate - Best Dashboard Ever</title>
+    <script>
+        // Apply saved preferences IMMEDIATELY before CSS loads
+        (function() {
+            const savedPrefs = localStorage.getItem('weatherProPrefs');
+            if (savedPrefs) {
+                try {
+                    const prefs = JSON.parse(savedPrefs);
+                    const root = document.documentElement;
+                    
+                    if (prefs.customColor) {
+                        const color = prefs.customColor;
+                        const r = parseInt(color.substr(1, 2), 16);
+                        const g = parseInt(color.substr(3, 2), 16);
+                        const b = parseInt(color.substr(5, 2), 16);
+                        root.style.setProperty('--accent-primary', color);
+                        root.style.setProperty('--accent-secondary', color);
+                        root.style.setProperty('--accent-glow', `rgba(${r}, ${g}, ${b}, 0.5)`);
+                    } else if (prefs.accent) {
+                        const accentColors = {
+                            'purple': { primary: '#8b5cf6', secondary: '#a78bfa', glow: 'rgba(139, 92, 246, 0.5)' },
+                            'blue': { primary: '#3b82f6', secondary: '#60a5fa', glow: 'rgba(59, 130, 246, 0.5)' },
+                            'green': { primary: '#10b981', secondary: '#34d399', glow: 'rgba(16, 185, 129, 0.5)' },
+                            'red': { primary: '#ef4444', secondary: '#f87171', glow: 'rgba(239, 68, 68, 0.5)' },
+                            'orange': { primary: '#f59e0b', secondary: '#fbbf24', glow: 'rgba(245, 158, 11, 0.5)' },
+                            'pink': { primary: '#ec4899', secondary: '#f472b6', glow: 'rgba(236, 72, 153, 0.5)' }
+                        };
+                        const colors = accentColors[prefs.accent];
+                        if (colors) {
+                            root.style.setProperty('--accent-primary', colors.primary);
+                            root.style.setProperty('--accent-secondary', colors.secondary);
+                            root.style.setProperty('--accent-glow', colors.glow);
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to apply cached preferences:', e);
+                }
+            }
+        })();
+    </script>
+    <link rel="stylesheet" href="css/ultimate-dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body data-theme="dark" data-accent="purple">
+    
+    <!-- Animated Background -->
+    <div class="animated-background">
+        <canvas id="particleCanvas"></canvas>
+        <div class="gradient-overlay"></div>
+    </div>
+    
+    <!-- Foreground Weather Effects (appears on top for 5 seconds) -->
+    <canvas id="foregroundEffectsCanvas"></canvas>
+    
+    <!-- Custom Context Menu for Testing Weather Effects -->
+    <div class="weather-context-menu" id="weatherContextMenu">
+        <div class="context-menu-header">
+            <i class="fas fa-flask"></i>
+            Test Weather Effects
+        </div>
+        <div class="context-menu-item" data-weather="Snow">
+            <i class="fas fa-snowflake"></i>
+            <span>Snowfall ❄️</span>
+        </div>
+        <div class="context-menu-item" data-weather="Rain">
+            <i class="fas fa-cloud-rain"></i>
+            <span>Heavy Rain 🌧️</span>
+        </div>
+        <div class="context-menu-item" data-weather="Thunderstorm">
+            <i class="fas fa-bolt"></i>
+            <span>Thunderstorm ⚡</span>
+        </div>
+        <div class="context-menu-item" data-weather="Clear">
+            <i class="fas fa-sun"></i>
+            <span>Sunshine ☀️</span>
+        </div>
+        <div class="context-menu-item" data-weather="Clouds">
+            <i class="fas fa-cloud"></i>
+            <span>Cloudy ☁️</span>
+        </div>
+        <div class="context-menu-divider"></div>
+        <div class="context-menu-item" data-weather="Random">
+            <i class="fas fa-random"></i>
+            <span>Random Effect 🎲</span>
+        </div>
+        <div class="context-menu-item" data-weather="Party">
+            <i class="fas fa-star"></i>
+            <span>Party Mode 🎉</span>
+        </div>
+    </div>
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <div class="nav-left">
+            <div class="logo">
+                <i class="fas fa-cloud-sun-rain"></i>
+                <span>WeatherPro</span>
+            </div>
+            <div class="greeting">
+                <h2 id="greetingText">Good Evening</h2>
+                <p id="greetingSubtext">Don't forget your umbrella!</p>
+            </div>
+            <div class="time-display-weather">
+                <div class="time-display-inner">
+                    <i class="fas fa-clock clock-icon-weather"></i>
+                    <span id="currentTime">--:--:--</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav-right">
+            <button class="nav-btn location-btn" id="locationBtn">
+                <i class="fas fa-map-marker-alt"></i>
+                <span id="currentCity">London</span>
+            </button>
+            <button class="nav-btn avatar-btn" id="avatarBtn">
+                <span>U</span>
+            </button>
+            <button class="nav-btn" id="editLayoutBtn">
+                <i class="fas fa-edit"></i>
+                <span>Edit Layout</span>
+            </button>
+            <button class="nav-btn" id="settingsBtn">
+                <i class="fas fa-cog"></i>
+            </button>
+            <button class="nav-btn logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard Container -->
+    <main class="dashboard-grid" id="dashboardGrid">
+        
+        <!-- Current Weather Hero Card -->
+        <section class="weather-hero-card card-glow">
+            <div class="hero-left">
+                <div class="weather-icon-massive">
+                    <i class="fas fa-cloud-rain" id="mainWeatherIcon"></i>
+                </div>
+                <div class="temperature-display">
+                    <span class="temp-value" id="mainTemp">10</span>
+                    <span class="temp-unit">°C</span>
+                </div>
+                <p class="weather-condition" id="weatherCondition">Light Rain</p>
+            </div>
+            
+            <div class="hero-right">
+                <div class="metrics-grid-small">
+                    <div class="metric-mini">
+                        <i class="fas fa-temperature-high"></i>
+                        <div>
+                            <span class="metric-label">Feels Like</span>
+                            <span class="metric-value" id="feelsLike">7°C</span>
+                        </div>
+                    </div>
+                    <div class="metric-mini">
+                        <i class="fas fa-tint"></i>
+                        <div>
+                            <span class="metric-label">Humidity</span>
+                            <span class="metric-value" id="humidity">86%</span>
+                        </div>
+                    </div>
+                    <div class="metric-mini">
+                        <i class="fas fa-wind"></i>
+                        <div>
+                            <span class="metric-label">Wind Speed</span>
+                            <span class="metric-value" id="windSpeed">6.17 m/s</span>
+                        </div>
+                    </div>
+                    <div class="metric-mini">
+                        <i class="fas fa-eye"></i>
+                        <div>
+                            <span class="metric-label">Visibility</span>
+                            <span class="metric-value" id="visibility">10 km</span>
+                        </div>
+                    </div>
+                    <div class="metric-mini">
+                        <i class="fas fa-compress-arrows-alt"></i>
+                        <div>
+                            <span class="metric-label">Pressure</span>
+                            <span class="metric-value" id="pressure">1005 hPa</span>
+                        </div>
+                    </div>
+                    <div class="metric-mini">
+                        <i class="fas fa-cloud"></i>
+                        <div>
+                            <span class="metric-label">Cloudiness</span>
+                            <span class="metric-value" id="cloudiness">75%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hero-sun-times">
+                <div class="sun-time-card">
+                    <i class="fas fa-sunrise"></i>
+                    <div>
+                        <span class="sun-label">Sunrise</span>
+                        <span class="sun-value" id="sunrise">01:14 PM</span>
+                    </div>
+                </div>
+                <div class="sun-time-card">
+                    <i class="fas fa-sunset"></i>
+                    <div>
+                        <span class="sun-label">Sunset</span>
+                        <span class="sun-value" id="sunset">09:25 PM</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hourly Forecast Card -->
+        <section class="hourly-forecast-card card-glow">
+            <div class="card-header">
+                <h3><i class="fas fa-clock"></i> Hourly Forecast</h3>
+                <div class="card-actions">
+                    <button class="icon-btn" id="hourlyPrev"><i class="fas fa-chevron-left"></i></button>
+                    <button class="icon-btn" id="hourlyNext"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="hourly-scroll" id="hourlyScroll">
+                <!-- Hourly items will be added here -->
+            </div>
+        </section>
+
+        <!-- 7-Day Forecast Card -->
+        <section class="weekly-forecast-card card-glow">
+            <div class="card-header">
+                <h3><i class="fas fa-calendar-week"></i> 7-Day Forecast</h3>
+            </div>
+            <div class="weekly-list" id="weeklyList">
+                <!-- Weekly items will be added here -->
+            </div>
+        </section>
+
+        <!-- Air Quality Card -->
+        <section class="air-quality-card card-glow">
+            <div class="card-header">
+                <h3><i class="fas fa-smog"></i> Air Quality</h3>
+            </div>
+            <div class="aqi-display">
+                <div class="aqi-circle" id="aqiCircle">
+                    <span class="aqi-value" id="aqiValue">--</span>
+                    <span class="aqi-label" id="aqiLabel">Loading...</span>
+                </div>
+                <div class="aqi-details" id="aqiDetails"></div>
+            </div>
+        </section>
+
+        <!-- Weather Alerts Card -->
+        <section class="weather-alerts-card card-glow">
+            <div class="card-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Weather Alerts</h3>
+            </div>
+            <div class="alerts-container" id="alertsContainer">
+                <div class="alert-item">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <div>
+                        <strong>Loading...</strong>
+                        <p>Checking for weather alerts in your area...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Temperature Trend Card -->
+        <section class="temp-trend-card card-glow">
+            <div class="card-header">
+                <h3><i class="fas fa-chart-line"></i> Temperature Trend (24h)</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="tempChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Weather Comparison Card -->
+        <section class="weather-comparison-card card-glow">
+            <div class="card-header">
+                <h3><i class="fas fa-exchange-alt"></i> Weather Comparison</h3>
+            </div>
+            <div class="comparison-content">
+                <div class="comparison-location">
+                    <p class="location-name" id="currentLocationName">Your Location</p>
+                    <p class="location-temp" id="currentLocationTemp">--°C</p>
+                    <p class="location-condition" id="currentLocationCondition">--</p>
+                </div>
+                <div class="comparison-divider">
+                    <i class="fas fa-arrows-alt-h"></i>
+                </div>
+                <div class="comparison-location">
+                    <p class="location-name">Mumbai</p>
+                    <p class="location-temp">28°C</p>
+                    <p class="location-diff">Comparing...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Moon Phase Card -->
+        <section class="moon-phase-card card-glow">
+            <div class="card-header">
+                <h3><i class="fas fa-moon"></i> Moon Phase</h3>
+            </div>
+            <div class="moon-display">
+                <div class="moon-icon">
+                    <i class="fas fa-moon"></i>
+                </div>
+                <p class="moon-phase-name" id="moonPhaseName">Waning Crescent</p>
+                <p class="moon-illumination" id="moonIllumination">86% Illuminated</p>
+            </div>
+        </section>
+
+        <!-- Pollen & Allergy Card -->
+        <section class="pollen-card card-glow">
+            <div class="card-header">
+                <h3><i class="fas fa-seedling"></i> Pollen & Allergy Index</h3>
+            </div>
+            <div class="pollen-list">
+                <div class="pollen-item">
+                    <span>Grass</span>
+                    <span class="badge badge-moderate">Moderate</span>
+                </div>
+                <div class="pollen-item">
+                    <span>Tree</span>
+                    <span class="badge badge-low">Low</span>
+                </div>
+                <div class="pollen-item">
+                    <span>Weed</span>
+                    <span class="badge badge-high">High</span>
+                </div>
+                <div class="pollen-item">
+                    <span>Mold</span>
+                    <span class="badge badge-low">Low</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Severe Weather Tracker -->
+        <section class="severe-weather-card card-glow">
+            <div class="card-header">
+                <h3><i class="fas fa-bolt"></i> Severe Weather Tracker</h3>
+            </div>
+            <div class="severe-weather-status">
+                <i class="fas fa-check-circle status-ok"></i>
+                <div>
+                    <p class="status-title">All Clear</p>
+                    <p class="status-desc">No severe weather alerts in your area</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Smart Recommendations Card -->
+        <section class="recommendations-card card-glow">
+            <div class="card-header">
+                <h3><i class="fas fa-lightbulb"></i> Smart Recommendations</h3>
+            </div>
+            <div class="recommendations-content" id="recommendationsContent">
+                <div class="recommendation-item">
+                    <i class="fas fa-tshirt"></i>
+                    <div>
+                        <strong>What to Wear</strong>
+                        <p id="clothingSuggestion">Loading...</p>
+                    </div>
+                </div>
+                <div class="recommendation-item">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <strong>Best Time to Go Out</strong>
+                        <p id="bestTimeSuggestion">Loading...</p>
+                    </div>
+                </div>
+                <div class="recommendation-item">
+                    <i class="fas fa-running"></i>
+                    <div>
+                        <strong>Activity Suggestion</strong>
+                        <p id="activitySuggestion">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sunrise/Sunset Countdown -->
+        <section class="countdown-card card-glow">
+            <div class="card-header">
+                <h3><i class="fas fa-hourglass-half"></i> Sun Countdown</h3>
+            </div>
+            <div class="countdown-display" id="sunCountdown">
+                <div class="countdown-item">
+                    <i class="fas fa-sunrise"></i>
+                    <div>
+                        <span class="countdown-label" id="sunEventLabel">Next Sunrise</span>
+                        <span class="countdown-time" id="sunCountdownTime">--:--:--</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- UV Index Card -->
+        <section class="uv-index-card card-glow">
+            <div class="card-header">
+                <h3><i class="fas fa-sun"></i> UV Index</h3>
+            </div>
+            <div class="uv-display">
+                <div class="uv-value" id="uvValue">5</div>
+                <div class="uv-bar">
+                    <div class="uv-fill" id="uvFill"></div>
+                </div>
+                <p class="uv-level" id="uvLevel">Moderate</p>
+            </div>
+        </section>
+
+        <!-- Radar Map Card -->
+        <section class="radar-map-card card-glow">
+            <div class="card-header">
+                <h3><i class="fas fa-satellite-dish"></i> Weather Radar</h3>
+                <button class="icon-btn" id="expandMapBtn"><i class="fas fa-expand"></i></button>
+            </div>
+            <div class="map-container" id="mapContainer"></div>
+        </section>
+
+    </main>
+
+    <!-- Location Selector Modal -->
+    <div class="modal" id="locationModal">
+        <div class="modal-content location-modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-map-marked-alt"></i> Select Location on Map</h2>
+                <button class="close-modal" id="closeLocationModal"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <!-- Action Buttons at Top -->
+            <div class="modal-actions-top">
+                <button class="btn-action" id="useCurrentLocationBtnTop">
+                    <i class="fas fa-crosshairs"></i> Use Current Location
+                </button>
+                <button class="btn-action btn-cancel" id="cancelLocationBtnTop">Cancel</button>
+                <button class="btn-action btn-get-weather" id="getWeatherBtnTop">Get Weather</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="location-search">
+                    <input type="text" id="citySearch" placeholder="Search city... (Press Enter)">
+                    <button class="btn-primary" id="searchCityBtn">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+                <div class="coordinates-input">
+                    <input type="number" id="latInput" placeholder="Latitude" step="0.0001">
+                    <input type="number" id="lonInput" placeholder="Longitude" step="0.0001">
+                    <button class="btn-secondary" id="useCoordinatesBtn">Use</button>
+                </div>
+                <div class="map-selector" id="mapSelector"></div>
+                <div class="popular-cities">
+                    <h4><i class="fas fa-flag"></i> Popular Indian Cities</h4>
+                    <div class="city-grid">
+                        <button class="city-btn" data-city="Hyderabad">
+                            <i class="fas fa-city"></i>
+                            <span>Hyderabad</span>
+                        </button>
+                        <button class="city-btn" data-city="Mumbai">
+                            <i class="fas fa-building"></i>
+                            <span>Mumbai</span>
+                        </button>
+                        <button class="city-btn" data-city="Delhi">
+                            <i class="fas fa-landmark"></i>
+                            <span>Delhi</span>
+                        </button>
+                        <button class="city-btn" data-city="Bangalore">
+                            <i class="fas fa-laptop-code"></i>
+                            <span>Bangalore</span>
+                        </button>
+                        <button class="city-btn" data-city="Chennai">
+                            <i class="fas fa-water"></i>
+                            <span>Chennai</span>
+                        </button>
+                        <button class="city-btn" data-city="Kolkata">
+                            <i class="fas fa-bridge"></i>
+                            <span>Kolkata</span>
+                        </button>
+                    </div>
+                    <h4><i class="fas fa-globe-americas"></i> World Cities</h4>
+                    <div class="city-grid">
+                        <button class="city-btn" data-city="London">
+                            <i class="fas fa-crown"></i>
+                            <span>London</span>
+                        </button>
+                        <button class="city-btn" data-city="New York">
+                            <i class="fas fa-city"></i>
+                            <span>New York</span>
+                        </button>
+                        <button class="city-btn" data-city="Tokyo">
+                            <i class="fas fa-torii-gate"></i>
+                            <span>Tokyo</span>
+                        </button>
+                        <button class="city-btn" data-city="Paris">
+                            <i class="fas fa-monument"></i>
+                            <span>Paris</span>
+                        </button>
+                        <button class="city-btn" data-city="Dubai">
+                            <i class="fas fa-mosque"></i>
+                            <span>Dubai</span>
+                        </button>
+                        <button class="city-btn" data-city="Sydney">
+                            <i class="fas fa-umbrella-beach"></i>
+                            <span>Sydney</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customization Panel -->
+    <aside class="customization-panel" id="customizationPanel">
+        <div class="panel-header">
+            <h2><i class="fas fa-palette"></i> Customization</h2>
+            <button class="close-panel" id="closeCustomPanel"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-body">
+            
+            <!-- Theme Selector -->
+            <div class="custom-section">
+                <h3>Theme</h3>
+                <div class="theme-selector">
+                    <button class="theme-option active" data-theme="dark">
+                        <div class="theme-preview dark-preview"></div>
+                        <span>Dark</span>
+                    </button>
+                    <button class="theme-option" data-theme="light">
+                        <div class="theme-preview light-preview"></div>
+                        <span>Light</span>
+                    </button>
+                    <button class="theme-option" data-theme="aurora">
+                        <div class="theme-preview aurora-preview"></div>
+                        <span>Aurora</span>
+                    </button>
+                    <button class="theme-option" data-theme="sunset">
+                        <div class="theme-preview sunset-preview"></div>
+                        <span>Sunset</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Accent Color -->
+            <div class="custom-section">
+                <h3>Accent Color</h3>
+                <div class="color-picker">
+                    <button class="color-swatch active" data-color="purple" style="background: #8b5cf6"></button>
+                    <button class="color-swatch" data-color="blue" style="background: #3b82f6"></button>
+                    <button class="color-swatch" data-color="green" style="background: #10b981"></button>
+                    <button class="color-swatch" data-color="red" style="background: #ef4444"></button>
+                    <button class="color-swatch" data-color="orange" style="background: #f59e0b"></button>
+                    <button class="color-swatch" data-color="pink" style="background: #ec4899"></button>
+                </div>
+                <div class="custom-color-picker">
+                    <label for="customColorPicker">Custom Color (RGB):</label>
+                    <input type="color" id="customColorPicker" value="#8b5cf6">
+                    <button id="applyCustomColor" class="btn-apply-color">Apply</button>
+                </div>
+                <div class="color-preview" id="colorPreview"></div>
+            </div>
+
+            <!-- Card Style -->
+            <div class="custom-section">
+                <h3>Card Style</h3>
+                <div class="card-style-selector">
+                    <button class="style-option active" data-style="glass">Glass</button>
+                    <button class="style-option" data-style="neuro">Neuro</button>
+                    <button class="style-option" data-style="flat">Flat</button>
+                    <button class="style-option" data-style="gradient">Gradient</button>
+                </div>
+            </div>
+
+            <!-- Animation Speed -->
+            <div class="custom-section">
+                <h3>Animation Speed</h3>
+                <div class="slider-control">
+                    <span>Slow</span>
+                    <input type="range" id="animSpeedSlider" min="0.5" max="2" step="0.1" value="1">
+                    <span>Fast</span>
+                </div>
+            </div>
+
+            <!-- Font Size -->
+            <div class="custom-section">
+                <h3>Font Size</h3>
+                <div class="slider-control">
+                    <span>Small</span>
+                    <input type="range" id="fontSizeSlider" min="12" max="20" step="1" value="16">
+                    <span>Large</span>
+                </div>
+            </div>
+
+            <!-- Border Radius -->
+            <div class="custom-section">
+                <h3>Border Radius</h3>
+                <div class="slider-control">
+                    <span>Sharp</span>
+                    <input type="range" id="borderRadiusSlider" min="0" max="32" step="4" value="16">
+                    <span>Round</span>
+                </div>
+            </div>
+
+            <!-- Feature Toggles -->
+            <div class="custom-section">
+                <h3>Features</h3>
+                <div class="toggle-list">
+                    <div class="toggle-item">
+                        <span>Particle Effects</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="particleToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <span>Weather Effects</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="weatherEffectsToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <span>Auto Refresh</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoRefreshToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <span>Sound Effects</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="soundToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <span>Compact Mode</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="compactToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="panel-footer">
+            <button class="btn-secondary" id="resetSettingsBtn">Reset to Default</button>
+            <button class="btn-primary" id="saveSettingsBtn">Save Settings</button>
+        </div>
+    </aside>
+
+    <!-- Profile Modal -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content profile-modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-circle"></i> User Profile</h2>
+                <button class="close-btn" id="closeProfileModal">&times;</button>
+            </div>
+            
+            <div class="profile-body">
+                <!-- Profile Header -->
+                <div class="profile-header-section">
+                    <div class="profile-avatar-large" id="profileAvatarLarge">
+                        <span id="profileInitial">U</span>
+                    </div>
+                    <div class="profile-info">
+                        <h3 id="profileUsername">Username</h3>
+                        <p id="profileEmail">user@example.com</p>
+                        <span class="profile-badge"><i class="fas fa-crown"></i> Premium User</span>
+                    </div>
+                </div>
+
+                <!-- Profile Stats -->
+                <div class="profile-stats">
+                    <div class="stat-card-profile">
+                        <i class="fas fa-calendar-check"></i>
+                        <div>
+                            <h4>Member Since</h4>
+                            <p id="memberSinceDate">Jan 2024</p>
+                        </div>
+                    </div>
+                    <div class="stat-card-profile">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <div>
+                            <h4>Locations</h4>
+                            <p id="savedLocations">5</p>
+                        </div>
+                    </div>
+                    <div class="stat-card-profile">
+                        <i class="fas fa-eye"></i>
+                        <div>
+                            <h4>Checks</h4>
+                            <p id="weatherChecks">254</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="profile-section">
+                    <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+                    <div class="quick-actions-grid">
+                        <button class="action-btn-profile" id="changePasswordBtn">
+                            <i class="fas fa-key"></i>
+                            <span>Change Password</span>
+                        </button>
+                        <button class="action-btn-profile" id="exportDataBtn">
+                            <i class="fas fa-download"></i>
+                            <span>Export Data</span>
+                        </button>
+                        <button class="action-btn-profile action-btn-primary" id="notificationSettingsBtn">
+                            <i class="fas fa-bell"></i>
+                            <span>Notifications</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Preferences -->
+                <div class="profile-section">
+                    <h3><i class="fas fa-sliders-h"></i> Weather Preferences</h3>
+                    <div class="preference-list">
+                        <div class="preference-item-profile">
+                            <div class="pref-label">
+                                <i class="fas fa-thermometer-half"></i>
+                                <span>Temperature Unit</span>
+                            </div>
+                            <select id="tempUnitSelect" class="pref-select-profile">
+                                <option value="celsius">Celsius (°C)</option>
+                                <option value="fahrenheit">Fahrenheit (°F)</option>
+                            </select>
+                        </div>
+                        <div class="preference-item-profile">
+                            <div class="pref-label">
+                                <i class="fas fa-wind"></i>
+                                <span>Wind Speed Unit</span>
+                            </div>
+                            <select id="windUnitSelect" class="pref-select-profile">
+                                <option value="ms">m/s</option>
+                                <option value="kmh">km/h</option>
+                                <option value="mph">mph</option>
+                            </select>
+                        </div>
+                        <div class="preference-item-profile">
+                            <div class="pref-label">
+                                <i class="fas fa-clock"></i>
+                                <span>Time Format</span>
+                            </div>
+                            <select id="timeFormatSelect" class="pref-select-profile">
+                                <option value="24">24-hour</option>
+                                <option value="12">12-hour</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div class="profile-actions">
+                    <button class="btn-save-profile" id="saveProfileBtn">
+                        <i class="fas fa-save"></i>
+                        <span>Save Changes</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Layout Modal -->
+    <div class="modal" id="editLayoutModal">
+        <div class="modal-content edit-layout-modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-th-large"></i> Edit Dashboard Layout</h2>
+                <button class="close-btn" id="closeEditLayoutModal">&times;</button>
+            </div>
+            
+            <div class="edit-layout-body">
+                <div class="layout-instructions">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Drag and drop cards to rearrange your dashboard. Toggle visibility to show/hide cards.</p>
+                </div>
+
+                <!-- Layout Presets -->
+                <div class="layout-presets">
+                    <h3>Quick Layouts</h3>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-layout="default">
+                            <i class="fas fa-th"></i>
+                            <span>Default</span>
+                        </button>
+                        <button class="preset-btn" data-layout="compact">
+                            <i class="fas fa-compress"></i>
+                            <span>Compact</span>
+                        </button>
+                        <button class="preset-btn" data-layout="detailed">
+                            <i class="fas fa-expand"></i>
+                            <span>Detailed</span>
+                        </button>
+                        <button class="preset-btn" data-layout="minimal">
+                            <i class="fas fa-minus"></i>
+                            <span>Minimal</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card Visibility Controls -->
+                <div class="card-visibility-section">
+                    <h3>Card Visibility</h3>
+                    <div class="visibility-grid">
+                        <div class="visibility-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked data-card="hero">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span><i class="fas fa-cloud-sun"></i> Main Weather</span>
+                        </div>
+                        <div class="visibility-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked data-card="hourly">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span><i class="fas fa-clock"></i> Hourly Forecast</span>
+                        </div>
+                        <div class="visibility-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked data-card="weekly">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span><i class="fas fa-calendar-week"></i> Weekly Forecast</span>
+                        </div>
+                        <div class="visibility-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked data-card="aqi">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span><i class="fas fa-wind"></i> Air Quality</span>
+                        </div>
+                        <div class="visibility-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked data-card="alerts">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span><i class="fas fa-exclamation-triangle"></i> Weather Alerts</span>
+                        </div>
+                        <div class="visibility-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked data-card="chart">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span><i class="fas fa-chart-line"></i> Temperature Chart</span>
+                        </div>
+                        <div class="visibility-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked data-card="map">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span><i class="fas fa-map"></i> Weather Map</span>
+                        </div>
+                        <div class="visibility-item">
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked data-card="recommendations">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span><i class="fas fa-lightbulb"></i> Recommendations</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid Size Control -->
+                <div class="grid-size-section">
+                    <h3>Grid Columns</h3>
+                    <div class="grid-size-control">
+                        <button class="grid-btn" data-cols="1"><i class="fas fa-square"></i> 1</button>
+                        <button class="grid-btn active" data-cols="2"><i class="fas fa-th-large"></i> 2</button>
+                        <button class="grid-btn" data-cols="3"><i class="fas fa-th"></i> 3</button>
+                        <button class="grid-btn" data-cols="4"><i class="fas fa-grip-horizontal"></i> 4</button>
+                    </div>
+                </div>
+
+                <div class="layout-actions">
+                    <button class="btn-secondary" id="resetLayoutBtn">
+                        <i class="fas fa-undo"></i> Reset Layout
+                    </button>
+                    <button class="btn-primary" id="saveLayoutBtn">
+                        <i class="fas fa-save"></i> Save Layout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay show" id="loadingOverlay">
+        <div class="loader-spinner"></div>
+        <p>Loading weather data...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/ultimate-dashboard.js"></script>
+</body>
+</html>
+

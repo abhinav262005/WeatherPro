@@ -1,0 +1,331 @@
+/* ============================================
+   ADVANCED ANIMATIONS & TRANSITIONS
+   ============================================ */
+
+/* Widget Entrance Animations */
+@keyframes widgetSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.widget {
+    animation: widgetSlideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Temperature Morph Animation */
+.temp-value {
+    animation: tempPulse 2s ease-in-out infinite;
+}
+
+@keyframes tempPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+/* Weather Icon Animations */
+.weather-icon-animated {
+    animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-10px) rotate(5deg);
+    }
+}
+
+/* Forecast Card Hover Effects */
+.forecast-card {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.forecast-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.forecast-card:hover::before {
+    opacity: 1;
+}
+
+/* Glow Ring Animation */
+@keyframes glowRing {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.3),
+                    0 0 40px rgba(255, 255, 255, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.5),
+                    0 0 60px rgba(255, 255, 255, 0.2);
+    }
+}
+
+.forecast-card:hover {
+    animation: glowRing 2s ease-in-out infinite;
+}
+
+/* Loading Spinner */
+@keyframes spinGradient {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader {
+    animation: spinGradient 1s linear infinite;
+}
+
+/* Shimmer Effect */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+.shimmer {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+}
+
+/* Stat Card Pulse */
+.stat-card {
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    animation: statPulse 0.6s ease;
+}
+
+@keyframes statPulse {
+    0%, 100% {
+        transform: translateY(-4px) scale(1);
+    }
+    50% {
+        transform: translateY(-4px) scale(1.05);
+    }
+}
+
+/* Panel Slide In */
+.side-panel {
+    animation: panelSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes panelSlideIn {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* Toast Notification */
+@keyframes toastBounce {
+    0% {
+        transform: translateX(400px) scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: translateX(-20px) scale(1.05);
+    }
+    100% {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.toast {
+    animation: toastBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Button Ripple Effect */
+.icon-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.icon-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.icon-btn:active::after {
+    width: 200px;
+    height: 200px;
+}
+
+/* Chart Animation */
+@keyframes chartFadeIn {
+    from {
+        opacity: 0;
+        transform: scaleY(0);
+        transform-origin: bottom;
+    }
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
+.hourly-chart-container canvas {
+    animation: chartFadeIn 0.8s ease-out;
+}
+
+/* Wind Compass Rotation */
+.wind-arrow {
+    transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-size: 3rem;
+    display: inline-block;
+}
+
+/* AQI Meter Fill */
+@keyframes fillMeter {
+    from {
+        width: 0;
+    }
+}
+
+.aqi-fill, .uv-fill, .humidity-fill {
+    animation: fillMeter 1s ease-out;
+    transition: width 0.5s ease;
+}
+
+/* Parallax Orbs */
+@keyframes orbFloat1 {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+    }
+    50% {
+        transform: translate(30px, -30px) scale(1.1);
+    }
+}
+
+@keyframes orbFloat2 {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+    }
+    50% {
+        transform: translate(-40px, 20px) scale(0.9);
+    }
+}
+
+.parallax-orb-1 {
+    animation: orbFloat1 8s ease-in-out infinite;
+}
+
+.parallax-orb-2 {
+    animation: orbFloat2 10s ease-in-out infinite;
+}
+
+/* Micro-interactions */
+.widget-btn {
+    transition: all 0.2s ease;
+}
+
+.widget-btn:hover {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.widget-btn:active {
+    transform: scale(0.95);
+}
+
+/* Skeleton Loading */
+@keyframes skeleton {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 0px,
+        rgba(255, 255, 255, 0.15) 40px,
+        rgba(255, 255, 255, 0.05) 80px
+    );
+    background-size: 200px 100%;
+    animation: skeleton 1.5s infinite;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* 3D Flip Card */
+.forecast-card {
+    perspective: 1000px;
+}
+
+.forecast-card.flipped .card-front {
+    transform: rotateY(180deg);
+}
+
+.forecast-card.flipped .card-back {
+    transform: rotateY(0deg);
+}
+
+.card-front,
+.card-back {
+    backface-visibility: hidden;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.card-back {
+    transform: rotateY(-180deg);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}

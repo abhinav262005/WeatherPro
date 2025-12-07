@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Hyper-Advanced Cinematic Weather Dashboard">
+    <meta name="theme-color" content="#667eea">
+    <title>Weather Dashboard - Cinematic Experience</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Preconnect to APIs -->
+    <link rel="preconnect" href="https://api.openweathermap.org">
+    
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="css/core.css">
+    <link rel="stylesheet" href="css/gradients.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/animations.css">
+    
+    <!-- External Libraries (CDN) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+</head>
+<body data-theme="day" data-gradient="day">
+    
+    <!-- Animated Gradient Background -->
+    <div id="gradient-bg" class="gradient-background">
+        <div class="gradient-layer layer-1"></div>
+        <div class="gradient-layer layer-2"></div>
+        <div class="gradient-layer layer-3"></div>
+        <canvas id="particles-canvas"></canvas>
+    </div>
+    
+    <!-- Main App Container -->
+    <div id="app" class="app-container">
+        
+        <!-- Top Navigation Bar -->
+        <nav class="top-nav glass-panel">
+            <div class="nav-left">
+                <h1 class="app-title">
+                    <span class="icon">⛅</span>
+                    Weather<span class="accent">Pro</span>
+                </h1>
+            </div>
+            
+            <div class="nav-center">
+                <div class="location-search">
+                    <input type="text" id="location-input" placeholder="Search location..." autocomplete="off">
+                    <button id="geolocate-btn" class="icon-btn" title="Use my location">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M12 2v4m0 12v4M2 12h4m12 0h4m-6 0a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="nav-right">
+                <button id="theme-btn" class="icon-btn" title="Theme Customizer">🎨</button>
+                <button id="widgets-btn" class="icon-btn" title="Widget Manager">📊</button>
+                <button id="alerts-btn" class="icon-btn" title="Alerts">🔔</button>
+                <button id="settings-btn" class="icon-btn" title="Settings">⚙️</button>
+            </div>
+        </nav>
+        
+        <!-- Hero Panel -->
+        <section id="hero-panel" class="hero-panel glass-panel">
+            <div class="hero-content">
+                <div class="current-temp-display">
+                    <span id="temp-value" class="temp-value">--</span>
+                    <span class="temp-unit">°C</span>
+                </div>
+                <div id="weather-icon" class="weather-icon-animated"></div>
+                <div class="weather-description">
+                    <h2 id="weather-main">Loading...</h2>
+                    <p id="weather-desc">Fetching weather data</p>
+                </div>
+                <div class="location-display">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                    </svg>
+                    <span id="location-name">--</span>
+                </div>
+            </div>
+            
+            <div class="hero-stats">
+                <div class="stat-card glass-mini">
+                    <span class="stat-label">Feels Like</span>
+                    <span id="feels-like" class="stat-value">--°</span>
+                </div>
+                <div class="stat-card glass-mini">
+                    <span class="stat-label">Humidity</span>
+                    <span id="humidity" class="stat-value">--%</span>
+                </div>
+                <div class="stat-card glass-mini">
+                    <span class="stat-label">Wind</span>
+                    <span id="wind" class="stat-value">-- km/h</span>
+                </div>
+                <div class="stat-card glass-mini">
+                    <span class="stat-label">Pressure</span>
+                    <span id="pressure" class="stat-value">-- hPa</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Widget Grid Container -->
+        <div id="widget-grid" class="widget-grid">
+            <!-- Widgets will be dynamically inserted here -->
+        </div>
+        
+    </div>
+    
+    <!-- Theme Customizer Panel (Hidden by default) -->
+    <aside id="theme-customizer" class="side-panel glass-panel hidden">
+        <div class="panel-header">
+            <h3>Theme Customizer</h3>
+            <button class="close-btn">×</button>
+        </div>
+        <div class="panel-content">
+            <!-- Theme controls will be injected here -->
+        </div>
+    </aside>
+    
+    <!-- Widget Manager Panel -->
+    <aside id="widget-manager" class="side-panel glass-panel hidden">
+        <div class="panel-header">
+            <h3>Widget Manager</h3>
+            <button class="close-btn">×</button>
+        </div>
+        <div class="panel-content">
+            <!-- Widget controls will be injected here -->
+        </div>
+    </aside>
+    
+    <!-- Alert Center -->
+    <aside id="alert-center" class="side-panel glass-panel hidden">
+        <div class="panel-header">
+            <h3>Alert Center</h3>
+            <button class="close-btn">×</button>
+        </div>
+        <div class="panel-content" id="alerts-content">
+            <!-- Alerts will be injected here -->
+        </div>
+    </aside>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loader"></div>
+        <p>Loading weather data...</p>
+    </div>
+    
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+    
+    <!-- Main App Script (ES Module) -->
+    <script type="module" src="js/app.js"></script>
+    
+</body>
+</html>

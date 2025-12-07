@@ -1,0 +1,313 @@
+/* ============================================
+   THEME SYSTEM & CUSTOMIZATION
+   ============================================ */
+
+/* Theme Controls Styling */
+.theme-controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+.theme-section {
+    padding: var(--space-4);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+}
+
+.theme-section h4 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-4);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.gradient-presets {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+}
+
+.gradient-preset {
+    padding: var(--space-4);
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.gradient-preset:hover {
+    transform: scale(1.05);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.theme-section label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.theme-section input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.2);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.theme-section input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.theme-section input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.theme-section select {
+    padding: var(--space-2) var(--space-3);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: var(--font-size-base);
+    cursor: pointer;
+}
+
+.theme-section select option {
+    background: #1a1a1a;
+    color: white;
+}
+
+.theme-section input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.theme-btn {
+    padding: var(--space-3) var(--space-4);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    margin-bottom: var(--space-2);
+    width: 100%;
+}
+
+.theme-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Layout Modes */
+[data-layout="compact"] {
+    --space-4: 0.75rem;
+    --space-6: 1rem;
+    --space-8: 1.5rem;
+}
+
+[data-layout="spacious"] {
+    --space-4: 1.5rem;
+    --space-6: 2rem;
+    --space-8: 3rem;
+}
+
+/* Widget-specific Styles */
+.aqi-display,
+.uv-display,
+.humidity-display,
+.wind-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+}
+
+.aqi-value,
+.uv-value,
+.humidity-value {
+    font-size: var(--font-size-5xl);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.aqi-label,
+.uv-label,
+.humidity-label {
+    font-size: var(--font-size-lg);
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.aqi-description,
+.uv-advice {
+    text-align: center;
+    opacity: 0.7;
+    font-size: var(--font-size-sm);
+}
+
+.aqi-components {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+    width: 100%;
+    margin-top: var(--space-4);
+}
+
+.aqi-component {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-3);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-md);
+}
+
+.aqi-component span {
+    font-size: var(--font-size-xs);
+    opacity: 0.7;
+}
+
+.aqi-component strong {
+    font-size: var(--font-size-lg);
+    margin-top: var(--space-1);
+}
+
+.uv-bar,
+.humidity-bar {
+    width: 100%;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    position: relative;
+}
+
+.uv-fill,
+.humidity-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width 0.5s ease;
+}
+
+.humidity-fill {
+    background: linear-gradient(90deg, #3b82f6, #06b6d4);
+}
+
+.wind-compass {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin: var(--space-4) 0;
+}
+
+.wind-compass::before {
+    content: 'N';
+    position: absolute;
+    top: 10px;
+    font-size: var(--font-size-sm);
+    opacity: 0.5;
+}
+
+.wind-info {
+    text-align: center;
+}
+
+.wind-direction {
+    font-size: var(--font-size-2xl);
+    font-weight: 600;
+}
+
+.wind-speed {
+    font-size: var(--font-size-lg);
+    opacity: 0.7;
+}
+
+/* Alert Cards */
+.alert-card {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-3);
+    border-left: 4px solid;
+}
+
+.alert-card.severe {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+}
+
+.alert-card.warning {
+    background: rgba(251, 191, 36, 0.1);
+    border-color: #fbbf24;
+}
+
+.alert-card.info {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: #3b82f6;
+}
+
+.alert-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-2);
+}
+
+.alert-icon {
+    font-size: var(--font-size-2xl);
+}
+
+.alert-header h4 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+}
+
+.alert-description {
+    font-size: var(--font-size-sm);
+    opacity: 0.8;
+    margin-bottom: var(--space-3);
+    line-height: 1.6;
+}
+
+.alert-time {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    font-size: var(--font-size-xs);
+    opacity: 0.6;
+}
+
+.no-alerts {
+    text-align: center;
+    padding: var(--space-8);
+    opacity: 0.5;
+}
