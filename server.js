@@ -10,15 +10,44 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Database connection pool
-const pool = mysql.createPool({
+const dbConfig = {
     host: process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT) || 3306,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
-});
+    queueLimit: 0,
+    connectTimeout: 60000,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 0
+};
+
+// Add SSL for production (Aiven requires SSL)
+if (process.env.NODE_ENV === 'production') {
+    dbConfig.ssl = {
+        rejectUnauthorized: false // Aiven uses self-signed certificates
+    };
+}
+
+const pool = mysql.createPool(dbConfig);
+
+// Test database connection on startup
+pool.getConnection()
+    .then(connection => {
+        console.log('✅ Database connected successfully!');
+        connection.release();
+    })
+    .catch(err => {
+        console.error('❌ Database connection failed:', err.message);
+        console.error('DB Config:', {
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT,
+            user: process.env.DB_USER,
+            database: process.env.DB_NAME
+        });
+    });
 
 // Middleware
 app.use(express.json());
