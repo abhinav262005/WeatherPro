@@ -159,7 +159,7 @@ app.post('/api/logout', (req, res) => {
 app.get('/api/user', isAuthenticated, async (req, res) => {
     try {
         const [users] = await pool.execute(
-            'SELECT id, username, email, full_name, profile_image, is_admin FROM users WHERE id = ?',
+            'SELECT id, username, email, full_name, profile_image, is_admin, created_at, weather_checks FROM users WHERE id = ?',
             [req.session.userId]
         );
 
@@ -202,9 +202,9 @@ app.get('/admin/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
 });
 
-// Admin panel (protected)
+// Admin panel (protected) - Now serves the ultimate admin panel
 app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+    res.sendFile(path.join(__dirname, 'public', 'admin-ultimate.html'));
 });
 
 // Admin login endpoint (separate from regular login)
@@ -425,6 +425,12 @@ app.post('/api/admin/verify-password', isAdmin, async (req, res) => {
         // Verify password
         const isValid = await bcrypt.compare(password, users[0].password);
         
+        console.log('Password verification:', {
+            userId: req.session.userId,
+            passwordProvided: password,
+            isValid: isValid
+        });
+        
         if (!isValid) {
             return res.status(401).json({ error: 'Invalid password' });
         }
@@ -501,6 +507,18 @@ app.get('/api/weather', isAuthenticated, async (req, res) => {
         }
 
         const response = await axios.get(url);
+        
+        // Increment weather checks counter for the user
+        try {
+            await pool.execute(
+                'UPDATE users SET weather_checks = weather_checks + 1 WHERE id = ?',
+                [req.session.userId]
+            );
+        } catch (dbError) {
+            console.error('Failed to update weather checks:', dbError);
+            // Don't fail the request if counter update fails
+        }
+        
         res.json(response.data);
     } catch (error) {
         console.error('Weather API error:', error);

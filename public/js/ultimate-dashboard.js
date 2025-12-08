@@ -34,11 +34,17 @@ const state = {
 // ========================================
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Scroll to top on page load
+    window.scrollTo(0, 0);
+    
     // Apply saved preferences immediately from localStorage before anything else
     const savedPrefs = localStorage.getItem('weatherProPrefs');
     if (savedPrefs) {
         try {
             const prefs = JSON.parse(savedPrefs);
+            // Merge saved prefs into state immediately
+            state.preferences = { ...state.preferences, ...prefs };
+            
             if (prefs.accent) {
                 document.body.setAttribute('data-accent', prefs.accent);
             }
@@ -53,6 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.documentElement.style.setProperty('--accent-secondary', prefs.customColor);
                 document.documentElement.style.setProperty('--accent-glow', `rgba(${r}, ${g}, ${b}, 0.5)`);
             }
+            console.log('✅ Applied cached preferences immediately:', prefs);
         } catch (e) {
             console.error('Failed to apply cached preferences:', e);
         }
@@ -63,12 +70,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadPreferences();
     
     // Load profile preferences from localStorage AFTER server preferences
-    // This ensures profile preferences override server defaults
+    // profilePreferences is legacy - weatherProPrefs should have everything now
     const profilePrefs = JSON.parse(localStorage.getItem('profilePreferences') || '{}');
-    if (profilePrefs.timeFormat) {
+    if (profilePrefs.timeFormat && !state.preferences.timeFormat) {
         state.preferences.timeFormat = profilePrefs.timeFormat;
-        console.log('✅ Applied saved time format:', profilePrefs.timeFormat);
+        console.log('✅ Applied saved time format from profilePreferences:', profilePrefs.timeFormat);
     }
+    
+    // Ensure timeFormat is applied
+    console.log('Final timeFormat:', state.preferences.timeFormat);
     
     setupEventListeners();
     
@@ -128,6 +138,10 @@ function updateUserDisplay() {
 
 async function loadPreferences() {
     try {
+        // Check if we already have preferences loaded from localStorage
+        const localPrefs = localStorage.getItem('weatherProPrefs');
+        const hasLocalPrefs = localPrefs ? JSON.parse(localPrefs) : null;
+        
         // Load from server
         const response = await fetch('/api/preferences');
         if (response.ok) {
@@ -135,7 +149,7 @@ async function loadPreferences() {
             
             // Map server preferences to state
             if (serverPrefs && serverPrefs.user_id) {
-                state.preferences = {
+                const newPrefs = {
                     theme: serverPrefs.theme || 'dark',
                     accent: serverPrefs.accent_color || 'purple',
                     customColor: serverPrefs.custom_color || null,
@@ -150,7 +164,28 @@ async function loadPreferences() {
                     compact: serverPrefs.compact_mode !== undefined ? serverPrefs.compact_mode : false,
                     timeFormat: serverPrefs.time_format || '24'
                 };
-                console.log('Loaded preferences from server:', state.preferences);
+                
+                // If localStorage has preferences, they take priority (user's latest changes)
+                if (hasLocalPrefs) {
+                    // Override server prefs with localStorage prefs
+                    if (hasLocalPrefs.accent) newPrefs.accent = hasLocalPrefs.accent;
+                    if (hasLocalPrefs.customColor) newPrefs.customColor = hasLocalPrefs.customColor;
+                    if (hasLocalPrefs.theme) newPrefs.theme = hasLocalPrefs.theme;
+                    if (hasLocalPrefs.cardStyle) newPrefs.cardStyle = hasLocalPrefs.cardStyle;
+                    if (hasLocalPrefs.timeFormat) newPrefs.timeFormat = hasLocalPrefs.timeFormat;
+                    if (hasLocalPrefs.fontSize !== undefined) newPrefs.fontSize = hasLocalPrefs.fontSize;
+                    if (hasLocalPrefs.borderRadius !== undefined) newPrefs.borderRadius = hasLocalPrefs.borderRadius;
+                    if (hasLocalPrefs.animSpeed !== undefined) newPrefs.animSpeed = hasLocalPrefs.animSpeed;
+                    if (hasLocalPrefs.particles !== undefined) newPrefs.particles = hasLocalPrefs.particles;
+                    if (hasLocalPrefs.weatherEffects !== undefined) newPrefs.weatherEffects = hasLocalPrefs.weatherEffects;
+                    if (hasLocalPrefs.autoRefresh !== undefined) newPrefs.autoRefresh = hasLocalPrefs.autoRefresh;
+                    if (hasLocalPrefs.sound !== undefined) newPrefs.sound = hasLocalPrefs.sound;
+                    if (hasLocalPrefs.compact !== undefined) newPrefs.compact = hasLocalPrefs.compact;
+                    console.log('✅ Applied localStorage preferences over server preferences');
+                }
+                
+                state.preferences = newPrefs;
+                console.log('Loaded preferences:', state.preferences);
             } else {
                 // Use defaults if no server preferences
                 console.log('No server preferences found, using defaults');
@@ -276,6 +311,12 @@ function applyPreferences() {
     document.getElementById('autoRefreshToggle').checked = state.preferences.autoRefresh;
     document.getElementById('soundToggle').checked = state.preferences.sound;
     document.getElementById('compactToggle').checked = state.preferences.compact;
+    
+    // Update time format select if it exists
+    const timeFormatSelect = document.getElementById('timeFormatSelect');
+    if (timeFormatSelect && state.preferences.timeFormat) {
+        timeFormatSelect.value = state.preferences.timeFormat;
+    }
 }
 
 // ========================================
@@ -556,6 +597,7 @@ async function loadWeatherData() {
         }, 100);
         
         initializeMap();
+        setupMapFullscreen();
         updateWeatherEffects();
         startSunCountdown();
         
@@ -846,7 +888,8 @@ function updateHeroCard() {
     const temp = convertTemperature(main.temp);
     const feelsLike = convertTemperature(main.feels_like);
     
-    document.getElementById('mainTemp').textContent = Math.round(temp);
+    document.getElementById('mainTemp').textContent = temp.toFixed(1);
+    document.getElementById('mainTempUnit').textContent = getTemperatureUnit();
     document.getElementById('weatherCondition').textContent = weather[0].description;
     
     // Update weather icon
@@ -854,9 +897,9 @@ function updateHeroCard() {
     document.getElementById('mainWeatherIcon').className = `fas ${iconClass}`;
     
     // Update metrics
-    document.getElementById('feelsLike').textContent = Math.round(feelsLike) + '°C';
+    document.getElementById('feelsLike').textContent = feelsLike.toFixed(1) + getTemperatureUnit();
     document.getElementById('humidity').textContent = main.humidity + '%';
-    document.getElementById('windSpeed').textContent = wind.speed.toFixed(2) + ' m/s';
+    document.getElementById('windSpeed').textContent = convertWindSpeed(wind.speed) + ' ' + getWindSpeedUnit();
     document.getElementById('visibility').textContent = (visibility / 1000).toFixed(1) + ' km';
     document.getElementById('pressure').textContent = main.pressure + ' hPa';
     document.getElementById('cloudiness').textContent = clouds.all + '%';
@@ -1075,7 +1118,7 @@ function updateWeatherComparison() {
     
     // Update current location
     document.getElementById('currentLocationName').textContent = currentCity;
-    document.getElementById('currentLocationTemp').textContent = currentTemp + '°C';
+    document.getElementById('currentLocationTemp').textContent = currentTemp + getTemperatureUnit();
     document.getElementById('currentLocationCondition').textContent = currentCondition;
     
     // Mumbai comparison stays the same (you can make this dynamic too if needed)
@@ -1110,7 +1153,7 @@ function updateChart() {
         type: 'line',
         data: {
             datasets: [{
-                label: 'Temperature (°C)',
+                label: 'Temperature (' + getTemperatureUnit() + ')',
                 data: data,
                 borderColor: '#8b5cf6',
                 backgroundColor: 'rgba(139, 92, 246, 0.1)',
@@ -1206,6 +1249,71 @@ function initializeMap() {
     // Remove message after first click
     state.map.once('click', function() {
         messageDiv.remove();
+    });
+}
+
+// Fullscreen functionality for Weather Radar
+function setupMapFullscreen() {
+    const expandBtn = document.getElementById('expandMapBtn');
+    const mapCard = document.querySelector('.radar-map-card');
+    
+    if (!expandBtn || !mapCard) return;
+    
+    expandBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            // Enter fullscreen
+            if (mapCard.requestFullscreen) {
+                mapCard.requestFullscreen();
+            } else if (mapCard.webkitRequestFullscreen) {
+                mapCard.webkitRequestFullscreen();
+            } else if (mapCard.msRequestFullscreen) {
+                mapCard.msRequestFullscreen();
+            }
+            
+            // Change icon to compress
+            expandBtn.querySelector('i').classList.remove('fa-expand');
+            expandBtn.querySelector('i').classList.add('fa-compress');
+            
+            // Invalidate map size after entering fullscreen
+            setTimeout(() => {
+                if (state.map) {
+                    state.map.invalidateSize();
+                }
+            }, 100);
+        } else {
+            // Exit fullscreen
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+            
+            // Change icon back to expand
+            expandBtn.querySelector('i').classList.remove('fa-compress');
+            expandBtn.querySelector('i').classList.add('fa-expand');
+            
+            // Invalidate map size after exiting fullscreen
+            setTimeout(() => {
+                if (state.map) {
+                    state.map.invalidateSize();
+                }
+            }, 100);
+        }
+    });
+    
+    // Listen for fullscreen changes (e.g., ESC key)
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+            expandBtn.querySelector('i').classList.remove('fa-compress');
+            expandBtn.querySelector('i').classList.add('fa-expand');
+            setTimeout(() => {
+                if (state.map) {
+                    state.map.invalidateSize();
+                }
+            }, 100);
+        }
     });
 }
 
@@ -1348,19 +1456,66 @@ function convertTemperature(temp) {
         return 0;
     }
     
-    // If temperature is already in Celsius range (-100 to 60), return as is
-    if (temp > -100 && temp < 60) {
-        console.log('Temperature already in Celsius:', temp);
-        return temp;
-    }
+    let celsius = temp;
     
     // If temperature is in Kelvin range (173 to 333), convert to Celsius
     if (temp > 173 && temp < 333) {
-        return temp - 273.15;
+        celsius = temp - 273.15;
+    } else if (temp > -100 && temp < 60) {
+        // Temperature is already in Celsius
+        celsius = temp;
+    } else {
+        // Otherwise, assume it's Kelvin and convert
+        celsius = temp - 273.15;
     }
     
-    // Otherwise, assume it's Kelvin and convert
-    return temp - 273.15;
+    // Check user preference for temperature unit
+    const profilePrefs = JSON.parse(localStorage.getItem('profilePreferences') || '{}');
+    const tempUnit = profilePrefs.tempUnit || state.preferences?.tempUnit || 'celsius';
+    
+    if (tempUnit === 'fahrenheit') {
+        // Convert Celsius to Fahrenheit
+        return (celsius * 9/5) + 32;
+    }
+    
+    return celsius;
+}
+
+function getTemperatureUnit() {
+    const profilePrefs = JSON.parse(localStorage.getItem('profilePreferences') || '{}');
+    const tempUnit = profilePrefs.tempUnit || state.preferences?.tempUnit || 'celsius';
+    return tempUnit === 'fahrenheit' ? '°F' : '°C';
+}
+
+function convertWindSpeed(speedInMs) {
+    // Speed comes in m/s from API
+    const profilePrefs = JSON.parse(localStorage.getItem('profilePreferences') || '{}');
+    const windUnit = profilePrefs.windUnit || state.preferences?.windUnit || 'ms';
+    
+    switch(windUnit) {
+        case 'kmh':
+            return (speedInMs * 3.6).toFixed(2);
+        case 'mph':
+            return (speedInMs * 2.237).toFixed(2);
+        case 'ms':
+        default:
+            return speedInMs.toFixed(2);
+    }
+}
+
+function getWindSpeedUnit() {
+    const profilePrefs = JSON.parse(localStorage.getItem('profilePreferences') || '{}');
+    const windUnit = profilePrefs.windUnit || state.preferences?.windUnit || 'ms';
+    
+    switch(windUnit) {
+        case 'kmh':
+            return 'km/h';
+        case 'mph':
+            return 'mph';
+        case 'ms':
+        default:
+            return 'm/s';
+    }
 }
 
 function getWeatherIconClass(condition) {
@@ -2219,25 +2374,73 @@ console.log('🌤️ WeatherPro Ultimate Dashboard initialized');
 // PROFILE MODAL FUNCTIONS
 // ========================================
 
-function loadProfileData() {
+async function loadProfileData() {
     if (!state.user) return;
     
-    // Update profile display
+    // Update profile display with actual user data
     const initial = state.user.username ? state.user.username[0].toUpperCase() : 'U';
     document.getElementById('profileInitial').textContent = initial;
     document.getElementById('profileUsername').textContent = state.user.username || 'User';
     document.getElementById('profileEmail').textContent = state.user.email || 'user@example.com';
     
-    // Load stats from localStorage or generate
-    const stats = JSON.parse(localStorage.getItem('userStats') || '{}');
-    document.getElementById('savedLocations').textContent = stats.savedLocations || '5';
-    document.getElementById('weatherChecks').textContent = stats.weatherChecks || '254';
+    // Format member since date from created_at
+    if (state.user.created_at) {
+        const date = new Date(state.user.created_at);
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const memberSince = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+        const memberSinceElement = document.getElementById('memberSince');
+        if (memberSinceElement) {
+            memberSinceElement.textContent = memberSince;
+        }
+    }
+    
+    // Fetch actual saved locations count from server
+    try {
+        console.log('Fetching locations count...');
+        const locationsResponse = await fetch('/api/locations');
+        console.log('Locations response status:', locationsResponse.status);
+        
+        if (locationsResponse.ok) {
+            const locations = await locationsResponse.json();
+            console.log('Locations data:', locations);
+            const locationsCount = Array.isArray(locations) ? locations.length : 0;
+            console.log('Locations count:', locationsCount);
+            
+            const savedLocationsElement = document.getElementById('savedLocations');
+            if (savedLocationsElement) {
+                savedLocationsElement.textContent = locationsCount;
+                console.log('Updated savedLocations element to:', locationsCount);
+            } else {
+                console.error('savedLocations element not found!');
+            }
+        } else {
+            console.error('Failed to fetch locations, status:', locationsResponse.status);
+        }
+    } catch (error) {
+        console.error('Failed to load locations count:', error);
+        // Fallback to localStorage
+        const stats = JSON.parse(localStorage.getItem('userStats') || '{}');
+        const savedLocationsElement = document.getElementById('savedLocations');
+        if (savedLocationsElement) {
+            savedLocationsElement.textContent = stats.savedLocations || '0';
+        }
+    }
+    
+    // Display weather checks from user data
+    const weatherChecksElement = document.getElementById('weatherChecks');
+    if (weatherChecksElement) {
+        weatherChecksElement.textContent = state.user.weather_checks || '0';
+    }
     
     // Load saved profile preferences
     const profilePrefs = JSON.parse(localStorage.getItem('profilePreferences') || '{}');
-    document.getElementById('tempUnitSelect').value = profilePrefs.tempUnit || 'celsius';
-    document.getElementById('windUnitSelect').value = profilePrefs.windUnit || 'ms';
-    document.getElementById('timeFormatSelect').value = profilePrefs.timeFormat || '24';
+    const tempUnitSelect = document.getElementById('tempUnitSelect');
+    const windUnitSelect = document.getElementById('windUnitSelect');
+    const timeFormatSelect = document.getElementById('timeFormatSelect');
+    
+    if (tempUnitSelect) tempUnitSelect.value = profilePrefs.tempUnit || 'celsius';
+    if (windUnitSelect) windUnitSelect.value = profilePrefs.windUnit || 'ms';
+    if (timeFormatSelect) timeFormatSelect.value = profilePrefs.timeFormat || '24';
     
     // Setup profile event listeners
     setupProfileEventListeners();
@@ -2253,9 +2456,14 @@ function saveProfilePreferences() {
     
     // Apply preferences to state immediately
     state.preferences.timeFormat = preferences.timeFormat;
+    state.preferences.tempUnit = preferences.tempUnit;
+    state.preferences.windUnit = preferences.windUnit;
     
-    // Save to localStorage
+    // Save to localStorage (both locations for compatibility)
     localStorage.setItem('profilePreferences', JSON.stringify(preferences));
+    
+    // Also update weatherProPrefs to ensure it persists on reload
+    localStorage.setItem('weatherProPrefs', JSON.stringify(state.preferences));
     
     // Update time display immediately
     updateTime();
@@ -2357,7 +2565,15 @@ function setupProfileEventListeners() {
         playSound('click');
         state.preferences.tempUnit = e.target.value;
         savePreferences();
-        showNotification(`Temperature unit changed to ${e.target.value}`, 'success');
+        saveProfilePreferences();
+        showNotification(`Temperature unit changed to ${e.target.value === 'fahrenheit' ? 'Fahrenheit' : 'Celsius'}`, 'success');
+        // Refresh weather display with new unit
+        if (state.weatherData) {
+            updateWeatherDisplay(state.weatherData);
+        }
+        if (state.forecastData) {
+            updateForecast(state.forecastData);
+        }
     });
     
     // Wind Unit
@@ -2365,7 +2581,13 @@ function setupProfileEventListeners() {
         playSound('click');
         state.preferences.windUnit = e.target.value;
         savePreferences();
-        showNotification(`Wind speed unit changed to ${e.target.value}`, 'success');
+        saveProfilePreferences();
+        const unitNames = { 'ms': 'm/s', 'kmh': 'km/h', 'mph': 'mph' };
+        showNotification(`Wind speed unit changed to ${unitNames[e.target.value]}`, 'success');
+        // Refresh weather display with new unit
+        if (state.weatherData) {
+            updateWeatherDisplay(state.weatherData);
+        }
     });
     
     // Time Format

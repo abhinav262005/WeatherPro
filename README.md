@@ -66,8 +66,8 @@ Before you begin, ensure you have the following installed:
 
 ### 1. Clone the Repository
 ```bash
-git clone <repository-url>
-cd weather-dashboard
+git clone https://github.com/abhinav262005/WeatherPro.git
+cd WeatherPro
 ```
 
 ### 2. Install Dependencies
@@ -92,8 +92,13 @@ USE weather_dashboard;
 ```
 
 ### 4. Configure Environment Variables
-Edit the `.env` file with your credentials:
+Copy `.env.example` to `.env` and update with your credentials:
 
+```bash
+cp .env.example .env
+```
+
+Then edit `.env`:
 ```env
 DB_HOST=localhost
 DB_USER=root
@@ -103,6 +108,8 @@ SESSION_SECRET=your_super_secret_key_change_this
 PORT=3000
 WEATHER_API_KEY=your_openweathermap_api_key
 ```
+
+**Important:** Never commit your `.env` file to Git!
 
 ### 5. Get OpenWeatherMap API Key
 1. Go to [OpenWeatherMap](https://openweathermap.org/api)
@@ -275,11 +282,11 @@ app.use(compression());
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting a Pull Request.
 
 ## 📧 Support
 

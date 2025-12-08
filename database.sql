@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP NULL,
     profile_image VARCHAR(255) DEFAULT 'default-avatar.png',
+    weather_checks INT DEFAULT 0,
     INDEX idx_username (username),
     INDEX idx_email (email),
     INDEX idx_is_admin (is_admin)

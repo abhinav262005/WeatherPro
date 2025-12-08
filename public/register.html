@@ -179,5 +179,12 @@
     </div>
 
     <script src="js/register.js"></script>
+    <script>
+        // Apply theme from landing page
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
 </body>
 </html>

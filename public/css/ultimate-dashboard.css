@@ -249,14 +249,14 @@ html, body {
     border: var(--card-border);
     border-radius: var(--radius);
     padding: 1.5rem;
-    box-shadow: var(--card-glow);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
     will-change: transform;
 }
 
 .card-glow:hover {
     transform: translateY(-5px);
-    box-shadow: 0 0 40px var(--accent-glow);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
 }
 
 /* Card Style Variations */
@@ -277,7 +277,7 @@ body[data-card-style="neuro"] .card-glow:hover {
     box-shadow: 
         15px 15px 30px rgba(0, 0, 0, 0.6),
         -15px -15px 30px rgba(255, 255, 255, 0.08),
-        inset 0 0 0 1px var(--accent-primary);
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
     transform: translateY(-3px);
 }
 
@@ -292,7 +292,7 @@ body[data-card-style="flat"] .card-glow {
 
 body[data-card-style="flat"] .card-glow:hover {
     background: var(--bg-card);
-    border-color: var(--accent-primary);
+    border-color: rgba(255, 255, 255, 0.15);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     transform: translateY(-3px);
 }
@@ -303,14 +303,14 @@ body[data-card-style="gradient"] .card-glow {
         var(--accent-glow) 100%);
     backdrop-filter: blur(20px);
     border: 2px solid var(--accent-primary);
-    box-shadow: 0 0 30px var(--accent-glow), 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 body[data-card-style="gradient"] .card-glow:hover {
     background: linear-gradient(135deg, 
         var(--bg-card) 0%, 
-        var(--accent-glow) 80%);
-    box-shadow: 0 0 50px var(--accent-glow), 0 12px 40px rgba(0, 0, 0, 0.4);
+        rgba(255, 255, 255, 0.05) 80%);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
     transform: translateY(-5px);
 }
 
@@ -526,10 +526,11 @@ body[data-card-style="gradient"] .card-glow:hover {
 }
 
 .hourly-scroll {
-    display: flex;
-    gap: 1rem;
-    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 0.75rem;
     padding: 0.5rem 0;
+    overflow-x: auto;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     contain: layout style paint;
@@ -550,15 +551,18 @@ body[data-card-style="gradient"] .card-glow:hover {
 }
 
 .hourly-item {
-    flex: 0 0 auto;
-    width: 100px;
-    padding: 1.5rem 1rem;
+    min-width: 0;
+    padding: 1.25rem 0.75rem;
     background: var(--glass-bg);
     border: var(--glass-border);
     border-radius: 12px;
     text-align: center;
     transition: transform 0.2s ease, background 0.2s ease;
     will-change: transform;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .hourly-item:hover {
@@ -568,20 +572,69 @@ body[data-card-style="gradient"] .card-glow:hover {
 }
 
 .hourly-time {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--text-muted);
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
 }
 
 .hourly-icon {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
     color: var(--accent-primary);
-    margin: 1rem 0;
+    margin: 0.75rem 0;
 }
 
 .hourly-temp {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.hourly-desc {
+    font-size: 0.7rem !important;
+    opacity: 0.7 !important;
+    margin-top: 0.25rem !important;
+    text-align: center;
+    line-height: 1.2;
+}
+
+/* Responsive adjustments for hourly forecast */
+@media (max-width: 1400px) {
+    .hourly-scroll {
+        grid-template-columns: repeat(8, minmax(100px, 1fr));
+    }
+}
+
+@media (max-width: 1200px) {
+    .hourly-scroll {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .hourly-scroll {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .hourly-item {
+        padding: 1rem 0.5rem;
+    }
+    
+    .hourly-icon {
+        font-size: 2rem;
+    }
+    
+    .hourly-temp {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hourly-scroll {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* Weekly Forecast Card */
@@ -1882,12 +1935,12 @@ body[data-theme="aurora"] .gradient-overlay {
 body[data-theme="aurora"] .card-glow {
     background: linear-gradient(135deg, rgba(20, 27, 61, 0.9) 0%, rgba(10, 14, 39, 0.85) 100%);
     border: 1px solid rgba(0, 255, 135, 0.3);
-    box-shadow: 0 0 30px rgba(0, 255, 135, 0.3), 0 8px 32px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 body[data-theme="aurora"] .card-glow:hover {
-    box-shadow: 0 0 40px rgba(0, 255, 135, 0.5), 0 12px 40px rgba(0, 0, 0, 0.5);
-    border-color: rgba(0, 255, 135, 0.6);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    border-color: rgba(0, 255, 135, 0.4);
 }
 
 body[data-theme="aurora"] .top-navbar {
@@ -1935,12 +1988,12 @@ body[data-theme="sunset"] .gradient-overlay {
 body[data-theme="sunset"] .card-glow {
     background: linear-gradient(135deg, rgba(45, 20, 25, 0.9) 0%, rgba(26, 10, 15, 0.85) 100%);
     border: 1px solid rgba(255, 107, 107, 0.3);
-    box-shadow: 0 0 30px rgba(255, 107, 107, 0.3), 0 8px 32px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 body[data-theme="sunset"] .card-glow:hover {
-    box-shadow: 0 0 40px rgba(255, 107, 107, 0.5), 0 12px 40px rgba(0, 0, 0, 0.5);
-    border-color: rgba(255, 107, 107, 0.6);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 107, 107, 0.4);
 }
 
 body[data-theme="sunset"] .top-navbar {

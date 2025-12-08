@@ -277,15 +277,30 @@
                 // Update feature cards (using camelCase keys from admin panel)
                 const featureCards = document.querySelectorAll('.feature-card');
                 for (let i = 1; i <= 6; i++) {
+                    const iconKey = `feature${i}Icon`;
                     const titleKey = `feature${i}Title`;
                     const descKey = `feature${i}Desc`;
                     const cardIndex = i - 1;
                     
                     if (featureCards[cardIndex]) {
+                        // Update icon
+                        if (content[iconKey]) {
+                            const iconEl = featureCards[cardIndex].querySelector('.feature-icon i');
+                            if (iconEl) {
+                                // Remove all existing fa- classes
+                                iconEl.className = '';
+                                // Add new icon class
+                                iconEl.className = `fas ${content[iconKey]}`;
+                            }
+                        }
+                        
+                        // Update title
                         if (content[titleKey]) {
                             const titleEl = featureCards[cardIndex].querySelector('h3');
                             if (titleEl) titleEl.textContent = content[titleKey];
                         }
+                        
+                        // Update description
                         if (content[descKey]) {
                             const descEl = featureCards[cardIndex].querySelector('p');
                             if (descEl) descEl.textContent = content[descKey];
@@ -317,19 +332,40 @@
                     if (btnEl) btnEl.textContent = content.ctaButton;
                 }
                 
-                // Update contact info
-                if (content.contactEmail) {
-                    const emailEl = document.querySelector('.footer-section ul li:nth-child(1)');
-                    if (emailEl) emailEl.innerHTML = `<i class="fas fa-envelope"></i> ${content.contactEmail}`;
+                // Update footer company info
+                const footerSections = document.querySelectorAll('.footer-section');
+                if (footerSections.length >= 1 && content.companyName) {
+                    const companyNameEl = footerSections[0].querySelector('.logo span');
+                    if (companyNameEl) companyNameEl.textContent = content.companyName;
                 }
-                if (content.contactPhone) {
-                    const phoneEl = document.querySelector('.footer-section ul li:nth-child(2)');
-                    if (phoneEl) phoneEl.innerHTML = `<i class="fas fa-phone"></i> ${content.contactPhone}`;
+                if (footerSections.length >= 1 && content.companyDesc) {
+                    const companyDescEl = footerSections[0].querySelector('p');
+                    if (companyDescEl) companyDescEl.textContent = content.companyDesc;
                 }
-                if (content.contactAddress) {
-                    const addressEl = document.querySelector('.footer-section ul li:nth-child(3)');
-                    if (addressEl) addressEl.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${content.contactAddress}`;
+                if (content.copyrightText) {
+                    const copyrightEl = document.querySelector('.footer-bottom p');
+                    if (copyrightEl) copyrightEl.textContent = content.copyrightText;
                 }
+                
+                // Update contact info (3rd footer section)
+                if (footerSections.length >= 3) {
+                    const contactSection = footerSections[2];
+                    const contactList = contactSection.querySelector('ul');
+                    if (contactList) {
+                        const listItems = contactList.querySelectorAll('li');
+                        if (content.contactEmail && listItems[0]) {
+                            listItems[0].innerHTML = `<i class="fas fa-envelope"></i> ${content.contactEmail}`;
+                        }
+                        if (content.contactPhone && listItems[1]) {
+                            listItems[1].innerHTML = `<i class="fas fa-phone"></i> ${content.contactPhone}`;
+                        }
+                        if (content.contactAddress && listItems[2]) {
+                            listItems[2].innerHTML = `<i class="fas fa-map-marker-alt"></i> ${content.contactAddress}`;
+                        }
+                    }
+                }
+                
+                console.log('Content loaded:', content);
                 
             } catch (error) {
                 console.log('Using default content');
